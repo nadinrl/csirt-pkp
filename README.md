@@ -38,9 +38,8 @@ Aplikasi ini bertujuan untuk menyediakan sistem pelaporan insiden siber, penyeba
 
 ### 1. Clone Repositori
     git clone https://github.com/dhenick/csirt-pkp.git
-    cd csirt-pupr
-    cd backend
-
+    cd csirt-pkp
+    
 ### 2. Setup Backend
     cp .env.example .env
     composer install
