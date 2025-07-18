@@ -18,13 +18,26 @@ export default function Home() {
         arrows: true,
         pauseOnHover: true,
     };
-
+        //console.log("Artikel:", articles);
     return (
         <>
             <Head title="Beranda - CSIRT Kementerian PKP" />
             <PublicHeader />
 
             <main className="container mx-auto px-4 lg:px-6 py-10 space-y-20">
+                {/* HERO SECTION */}
+                <section className="text-center py-20 bg-gradient-to-r from-red-600 to-red-400 text-white rounded-lg shadow-md">
+                    <h1 className="text-4xl md:text-5xl font-bold mb-4">Selamat Datang di CSIRT Kementerian PKP</h1>
+                    <p className="text-lg md:text-xl mb-6">Merah Putih • Aman • Responsif</p>
+                    <Link
+                    href={route("public.articles")}
+                    className="inline-block bg-white text-red-600 font-semibold px-6 py-3 rounded-full hover:bg-slate-100 transition"
+                    >
+                    Jelajahi Artikel Keamanan →
+                    </Link>
+                </section>
+
+                
                 {/* SLIDER */}
                 {sliders?.length > 0 && (
                     <section className="rounded-lg overflow-hidden shadow-xl">
@@ -41,7 +54,7 @@ export default function Home() {
                         </Slider>
                     </section>
                 )}
-
+                
                 {/* ARTIKEL */}
                 <section>
                     <div className="flex justify-between items-center mb-6">
@@ -53,18 +66,32 @@ export default function Home() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {articles.slice(0, 3).map((article) => (
                             <Link
-                                key={article.id}
-                                href={route("articles.show", article.slug)}
-                                className="bg-white border rounded-xl p-5 hover:shadow-lg transition-all duration-300"
+                            key={article.id}
+                            href={route("articles.show", article.slug)}
+                            className="group bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300 border hover:border-red-400"
                             >
-                                <h3 className="text-lg font-semibold text-[#0f172a] mb-2">{article.title}</h3>
-                                <p className="text-sm text-slate-600 line-clamp-3">{article.excerpt}</p>
-                                <span className="mt-4 inline-block text-xs text-[#dc2626] font-medium">
-                                    Baca Selengkapnya →
-                                </span>
+                                <div className="h-48 bg-gray-100 rounded-t-xl overflow-hidden">
+                                    <img
+                                    src={article.image ? `/storage/${article.image}` : '/storage/articles/default.jpg'}
+                                    alt={article.title}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    />
+
+                                    </div>
+                                    <div className="p-5 flex flex-col justify-between h-40">
+                                        <h3 className="text-lg font-semibold text-[#0f172a] group-hover:text-red-600">
+                                            {article.title}
+                                            </h3>
+                                            <p className="text-sm text-slate-600 mt-2 line-clamp-3">
+                                                {article.excerpt}
+                                                </p>
+                                                <span className="inline-block mt-3 text-xs text-[#dc2626] font-medium">
+                                                    Baca Selengkapnya →
+                                                    </span>
+                                                    </div>
                             </Link>
-                        ))}
-                    </div>
+                                        ))}
+                                        </div>
                 </section>
 
                 {/* PANDUAN */}
