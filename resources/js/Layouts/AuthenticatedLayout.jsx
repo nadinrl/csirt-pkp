@@ -80,6 +80,12 @@ export default function AuthenticatedLayout({ header, children }) {
             icon: <Cog6ToothIcon className="w-4 h-4 inline mr-1" />,
             current: route().current('users.index'),
         },
+        {
+            href: route('public.contact'),
+            label: 'Kontak',
+            icon: <UserCircleIcon className="w-4 h-4 inline mr-1" />,
+            current: route().current('public.contact'),
+        },
     ];
 
     return (
