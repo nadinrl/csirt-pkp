@@ -46,6 +46,11 @@ Route::get('/captcha-refresh', function () {
         'b' => $b,
     ]);
 });
+
+Route::get('/kontak', function () {
+    return Inertia::render('Public/Contact');
+})->name('public.contact');
+
 // 🖥️ Dashboard
 Route::get('/dashboard', fn () => Inertia::render('Dashboard'))
     ->middleware(['auth', 'verified'])

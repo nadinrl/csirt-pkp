@@ -25,7 +25,7 @@ export default function PublicHeader() {
                         { label: "Panduan", route: "public.guides" },
                         { label: "Lapor Insiden", route: "incidents.create" },
                         { label: "Tracking Tiket", route: "incidents.track", params: { ticket: "" } },
-                        { label: "Kontak", href: "#kontak" },
+                        { label: "Kontak", href: "kontak" },
                     ].map((item, index) => {
                         const isHashLink = !!item.href;
 
