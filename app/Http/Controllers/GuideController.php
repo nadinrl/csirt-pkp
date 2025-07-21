@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
-use Inertia\Inertia;
 
 class GuideController extends Controller implements HasMiddleware
 {
@@ -133,19 +132,14 @@ class GuideController extends Controller implements HasMiddleware
     /**
      * Public: Daftar panduan aktif
      */
-    public function publicIndex(Request $request)
+    public function publicIndex()
     {
         $guides = Guide::where('is_active', true)
-        ->when($request->search, function ($query, $search) {
-            $query->where('title', 'like', "%{$search}%");
-        })
             ->latest()
-            ->paginate(10)
-            ->appends(['search' => $request->search]);
+            ->paginate(10);
 
         return inertia('Public/Guides/Index', [
             'guides' => $guides,
-            'filters' => $request->only('search'), // opsional, kalau mau kirim ke frontend
         ]);
     }
 
@@ -165,8 +159,8 @@ class GuideController extends Controller implements HasMiddleware
 
         return response()->download($path, $filename);
     }
-
-    public function detail(Guide $guide, Request $request)
+	
+	public function detail(Guide $guide)
 	{
 		abort_unless($guide->is_active, 403);
 
@@ -176,9 +170,7 @@ class GuideController extends Controller implements HasMiddleware
 				'title' => $guide->title,
 				'description' => $guide->description,
 				'download_url' => route('public.guides.show', $guide),
-                'file_url' => asset('storage/' . $guide->file_path), // penting
-            ],
-             'page' => $request->query('page'),
+			],
 		]);
 	}
 
