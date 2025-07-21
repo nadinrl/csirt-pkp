@@ -56,7 +56,7 @@ Route::get('/dashboard', fn () => Inertia::render('Dashboard'))
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-// 🔐 Halaman Admin (Autentikasi Diperlukan)
+// 🔐 Page Admin (Autentikasi Diperlukan)
 Route::middleware('auth')->group(function () {
 
     // 👤 Profile
