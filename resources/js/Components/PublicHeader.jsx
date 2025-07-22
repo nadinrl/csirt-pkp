@@ -1,3 +1,4 @@
+import Dropdown from '@/Components/Dropdown';
 import React from "react";
 import { Link } from "@inertiajs/react";
 
@@ -25,7 +26,7 @@ export default function PublicHeader() {
                         { label: "Panduan", route: "public.guides" },
                         { label: "Lapor Insiden", route: "incidents.create" },
                         { label: "Tracking Tiket", route: "incidents.track", params: { ticket: "" } },
-                        { label: "Kontak", href: "kontak" },
+                        { label: "Kontak", href: "#kontak" },
                     ].map((item, index) => {
                         const isHashLink = !!item.href;
 
@@ -48,6 +49,42 @@ export default function PublicHeader() {
                             </Link>
                         );
                     })}
+                    {/* Dropdown untuk "About Us" */}
+                    <div className="relative inline-flex items-center">
+                        <Dropdown>
+                            <Dropdown.Trigger>
+                                <span className="inline-flex rounded-md">
+                                    <button
+                                        type="button"
+                                        className="relative px-3 py-2 rounded-md transition-all duration-200 hover:bg-white/10 focus:outline-none inline-flex items-center text-sm font-medium text-white group" // Tambah group class di sini
+                                    >
+                                        About Us
+                                        <svg
+                                            className="ml-2 -mr-0.5 h-4 w-4"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 20 20"
+                                            fill="currentColor"
+                                        >
+                                            <path
+                                                fillRule="evenodd"
+                                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                clipRule="evenodd"
+                                            />
+                                        </svg>
+                                        <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full" />
+                                    </button>
+                                </span>
+                            </Dropdown.Trigger>
+
+                            <Dropdown.Content>
+                                {/* Panggil Dropdown.Link karena sudah diimpor dari Dropdown.jsx */}
+                                <Dropdown.Link href={route('about-us.profil')}>Profil</Dropdown.Link>
+                                <Dropdown.Link href={route('about-us.visi-misi')}>Visi Misi</Dropdown.Link>
+                                <Dropdown.Link href={route('about-us.struktur-organisasi')}>Struktur Organisasi</Dropdown.Link>
+                                <Dropdown.Link href={route('about-us.faq')}>FAQ</Dropdown.Link>
+                            </Dropdown.Content>
+                        </Dropdown>
+                    </div>
                 </nav>
             </div>
         </header>
