@@ -138,7 +138,7 @@ class ArticleController extends Controller implements HasMiddleware
      */
     public function publicIndex()
 	{
-		$articles = Article::select('id', 'title', 'slug', 'content', 'created_at')
+		$articles = Article::select('id', 'title', 'slug', 'content', 'created_at', 'image')
 			->latest()
 			->paginate(6)
 			->through(fn($article) => [
@@ -147,6 +147,7 @@ class ArticleController extends Controller implements HasMiddleware
 				'slug' => $article->slug,
 				'excerpt' => Str::limit(strip_tags($article->content), 120),
 				'created_at' => $article->created_at,
+                'image' => $article->image,
 			]);
 
 		return inertia('Public/Articles/Index', [
@@ -160,12 +161,19 @@ class ArticleController extends Controller implements HasMiddleware
      */
     public function show($slug)
     {
-        $article = Article::where('slug', $slug)->with('author')->firstOrFail();
+    $article = Article::where('slug', $slug)->with('author')->firstOrFail();
 
-        return inertia('Public/Articles/Show', [
-            'article' => $article,
-        ]);
-    }
+    // Ambil 2 artikel lain sebagai sugesti (selain yang sedang dibuka)
+    $suggestions = Article::where('slug', '!=', $slug)
+        ->latest()
+        ->take(2)
+        ->get(['id', 'title', 'slug', 'content', 'image']);
+
+    return inertia('Public/Articles/Show', [
+        'article' => $article,
+        'suggestions' => $suggestions,
+    ]);
+}
 
     /**
      * Generate unique slug.
