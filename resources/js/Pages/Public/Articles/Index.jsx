@@ -16,18 +16,23 @@ export default function ArticleIndex() {
                 <h1 className="text-3xl font-bold text-slate-800">Daftar Artikel</h1>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {articles.data.map((article) => (
-                        <Link
-                            key={article.id}
-                            href={route("articles.show", article.slug)}
-                            className="border p-4 rounded-md shadow hover:shadow-md transition bg-white"
-                        >
-                            <h3 className="text-lg font-semibold text-slate-800 mb-2">{article.title}</h3>
-                            <p className="text-sm text-slate-600 line-clamp-3">{article.excerpt}</p>
-                            <span className="text-xs text-red-600 mt-3 inline-block">Baca Selengkapnya →</span>
-                        </Link>
-                    ))}
-                </div>
+        {articles.data.map((article) => (
+        <Link
+            key={article.id}
+            href={route("articles.show", article.slug)}
+            className="border p-4 rounded-md shadow hover:shadow-md transition bg-white flex flex-col gap-3"
+        >
+        <img
+                src={article.image ? `/storage/${article.image}` : '/storage/articles/default.jpg'}
+                alt={article.title}
+                className="w-full h-48 object-cover rounded-md"
+        />
+            <h3 className="text-lg font-semibold text-slate-800">{article.title}</h3>
+            <p className="text-sm text-slate-600 line-clamp-3">{article.excerpt}</p>
+            <span className="text-xs text-red-600 mt-auto">Baca Selengkapnya →</span>
+            </Link>
+        ))}
+        </div>
 
                 {articles.last_page > 1 && (
                     <div className="mt-6 flex justify-center">
