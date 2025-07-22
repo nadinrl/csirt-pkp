@@ -38,11 +38,10 @@ export default function GuideIndex() {
     useEffect(() => {
         const hash = window.location.hash;
         if (!isSearching && hash) {
-            // Tunggu render selesai
             setTimeout(() => {
                 const el = document.querySelector(hash);
                 if (el) {
-                    const yOffset = -100; // Sesuaikan dengan tinggi sticky header
+                    const yOffset = -100; 
                     const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
                     window.scrollTo({ top: y, behavior: 'smooth' });
                 }
@@ -57,7 +56,7 @@ export default function GuideIndex() {
         if (!isSearching && page) {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-    }, [guides]); // guides akan berubah saat pagination berubah
+    }, [guides]); 
 
     return (
         <>
