@@ -30,6 +30,7 @@ class PublicController extends Controller
                     'author' => [
                         'name' => optional($article->author)->name,
                     ],
+                    'image' => $article->image,
                 ];
             }),
             'guides' => Guide::latest()->get()->map(function ($guide) {
