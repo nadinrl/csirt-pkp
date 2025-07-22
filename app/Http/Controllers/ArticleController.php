@@ -50,23 +50,37 @@ class ArticleController extends Controller implements HasMiddleware
      * Admin: Store new article.
      */
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'title' => 'required|min:5|max:255',
-            'content' => 'required',
-        ]);
+{
+    $validated = $request->validate([
+        'title' => 'required|min:5|max:255',
+        'content' => 'required',
+        'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+    ]);
 
-        $slug = $this->generateUniqueSlug($validated['title']);
+    $slug = $this->generateUniqueSlug($validated['title']);
 
-        Article::create([
-            'title' => $validated['title'],
-            'slug' => $slug,
-            'content' => $validated['content'],
-            'author_id' => auth()->id(),
-        ]);
+    // Default image null
+    $imagePath = null;
 
-        return to_route('articles.index')->with('success', 'Artikel berhasil ditambahkan.');
+    // Simpan file gambar jika ada
+    if ($request->hasFile('image')) {
+        // Simpan ke storage/app/public/articles
+        $imagePath = $request->file('image')->store('articles', 'public');
+        // Hasilnya: "articles/namafile.jpg"
     }
+
+    // Buat artikel
+    Article::create([
+        'title' => $validated['title'],
+        'slug' => $slug,
+        'content' => $validated['content'],
+        'author_id' => auth()->id(),
+        'image' => $imagePath, // hanya simpan "articles/namafile.jpg"
+    ]);
+
+    return to_route('articles.index')->with('success', 'Artikel berhasil ditambahkan.');
+}
+
 
     /**
      * Admin: Edit form.
@@ -86,6 +100,7 @@ class ArticleController extends Controller implements HasMiddleware
         $validated = $request->validate([
             'title' => 'required|min:5|max:255',
             'content' => 'required',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $slug = $article->slug;
@@ -93,10 +108,17 @@ class ArticleController extends Controller implements HasMiddleware
             $slug = $this->generateUniqueSlug($validated['title'], $article->id);
         }
 
+        $imagePath = $article->image;
+        
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('articles', 'public');
+        }
+
         $article->update([
             'title' => $validated['title'],
             'slug' => $slug,
             'content' => $validated['content'],
+            'image' => $imagePath,
         ]);
 
         return to_route('articles.index')->with('success', 'Artikel berhasil diperbarui.');
@@ -118,7 +140,7 @@ class ArticleController extends Controller implements HasMiddleware
 	{
 		$articles = Article::select('id', 'title', 'slug', 'content', 'created_at')
 			->latest()
-			->paginate(9)
+			->paginate(6)
 			->through(fn($article) => [
 				'id' => $article->id,
 				'title' => $article->title,
