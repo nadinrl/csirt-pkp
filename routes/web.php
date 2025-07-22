@@ -23,9 +23,8 @@ Route::get('/artikel', [ArticleController::class, 'publicIndex'])->name('public.
 Route::get('/artikel/{slug}', [ArticleController::class, 'show'])->name('articles.show');
 
 Route::get('/panduan', [GuideController::class, 'publicIndex'])->name('public.guides');
-Route::get('/panduan/{guide}', [GuideController::class, 'show'])->name('public.guides.show'); // untuk download
-Route::get('/panduan/{guide}/detail', [GuideController::class, 'detail'])->name('public.guides.detail'); // untuk preview
-Route::get('/panduan-publik', [GuideController::class, 'publicIndex'])->name('public.guides.index');
+Route::get('/panduan/{guide}/detail', [GuideController::class, 'detail'])->name('public.guides.detail');
+Route::get('/panduan/{guide}', [GuideController::class, 'show'])->name('public.guides.show');
 
 
 Route::prefix('lapor-insiden')->group(function () {
