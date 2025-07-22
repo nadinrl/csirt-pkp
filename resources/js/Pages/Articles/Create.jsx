@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import Container from "@/Components/Container";
 import { Head, useForm } from "@inertiajs/react";
@@ -14,12 +14,23 @@ export default function Create({ auth }) {
     const { data, setData, post, errors, processing, reset } = useForm({
         title: "",
         content: "",
+        image: null, // Tambahkan field image
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
+        // Gunakan FormData untuk menyertakan file
+        const formData = new FormData();
+        formData.append("title", data.title);
+        formData.append("content", data.content);
+        if (data.image) {
+            formData.append("image", data.image);
+        }
+
         post(route("articles.store"), {
+            data: formData,
+            forceFormData: true, // penting agar inertia tahu kita mengirim FormData
             onSuccess: () => {
                 Swal.fire({
                     title: "Berhasil!",
@@ -52,6 +63,22 @@ export default function Create({ auth }) {
                             errors={errors.title}
                             placeholder="Contoh: Tips Keamanan Siber untuk Pemula"
                         />
+
+                        {/* Upload Gambar */}
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">
+                                Gambar Artikel
+                            </label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => setData("image", e.target.files[0])}
+                                className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
+                            />
+                            {errors.image && (
+                                <p className="text-sm text-red-500 mt-2">{errors.image}</p>
+                            )}
+                        </div>
 
                         {/* Konten CKEditor */}
                         <div>
