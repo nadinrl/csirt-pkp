@@ -50,23 +50,37 @@ class ArticleController extends Controller implements HasMiddleware
      * Admin: Store new article.
      */
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'title' => 'required|min:5|max:255',
-            'content' => 'required',
-        ]);
+{
+    $validated = $request->validate([
+        'title' => 'required|min:5|max:255',
+        'content' => 'required',
+        'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+    ]);
 
-        $slug = $this->generateUniqueSlug($validated['title']);
+    $slug = $this->generateUniqueSlug($validated['title']);
 
-        Article::create([
-            'title' => $validated['title'],
-            'slug' => $slug,
-            'content' => $validated['content'],
-            'author_id' => auth()->id(),
-        ]);
+    // Default image null
+    $imagePath = null;
 
-        return to_route('articles.index')->with('success', 'Artikel berhasil ditambahkan.');
+    // Simpan file gambar jika ada
+    if ($request->hasFile('image')) {
+        // Simpan ke storage/app/public/articles
+        $imagePath = $request->file('image')->store('articles', 'public');
+        // Hasilnya: "articles/namafile.jpg"
     }
+
+    // Buat artikel
+    Article::create([
+        'title' => $validated['title'],
+        'slug' => $slug,
+        'content' => $validated['content'],
+        'author_id' => auth()->id(),
+        'image' => $imagePath, // hanya simpan "articles/namafile.jpg"
+    ]);
+
+    return to_route('articles.index')->with('success', 'Artikel berhasil ditambahkan.');
+}
+
 
     /**
      * Admin: Edit form.
@@ -86,6 +100,7 @@ class ArticleController extends Controller implements HasMiddleware
         $validated = $request->validate([
             'title' => 'required|min:5|max:255',
             'content' => 'required',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $slug = $article->slug;
@@ -93,10 +108,17 @@ class ArticleController extends Controller implements HasMiddleware
             $slug = $this->generateUniqueSlug($validated['title'], $article->id);
         }
 
+        $imagePath = $article->image;
+        
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('articles', 'public');
+        }
+
         $article->update([
             'title' => $validated['title'],
             'slug' => $slug,
             'content' => $validated['content'],
+            'image' => $imagePath,
         ]);
 
         return to_route('articles.index')->with('success', 'Artikel berhasil diperbarui.');
@@ -116,15 +138,16 @@ class ArticleController extends Controller implements HasMiddleware
      */
     public function publicIndex()
 	{
-		$articles = Article::select('id', 'title', 'slug', 'content', 'created_at')
+		$articles = Article::select('id', 'title', 'slug', 'content', 'created_at', 'image')
 			->latest()
-			->paginate(9)
+			->paginate(6)
 			->through(fn($article) => [
 				'id' => $article->id,
 				'title' => $article->title,
 				'slug' => $article->slug,
 				'excerpt' => Str::limit(strip_tags($article->content), 120),
 				'created_at' => $article->created_at,
+                'image' => $article->image,
 			]);
 
 		return inertia('Public/Articles/Index', [
@@ -138,12 +161,19 @@ class ArticleController extends Controller implements HasMiddleware
      */
     public function show($slug)
     {
-        $article = Article::where('slug', $slug)->with('author')->firstOrFail();
+    $article = Article::where('slug', $slug)->with('author')->firstOrFail();
 
-        return inertia('Public/Articles/Show', [
-            'article' => $article,
-        ]);
-    }
+    // Ambil 2 artikel lain sebagai sugesti (selain yang sedang dibuka)
+    $suggestions = Article::where('slug', '!=', $slug)
+        ->latest()
+        ->take(2)
+        ->get(['id', 'title', 'slug', 'content', 'image']);
+
+    return inertia('Public/Articles/Show', [
+        'article' => $article,
+        'suggestions' => $suggestions,
+    ]);
+}
 
     /**
      * Generate unique slug.
