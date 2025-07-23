@@ -28,7 +28,6 @@ Route::get('/panduan/{guide}', [GuideController::class, 'show'])->name('public.g
 Route::get('/panduan/{guide}/detail', [GuideController::class, 'detail'])->name('public.guides.detail'); // untuk preview
 Route::get('/panduan-publik', [GuideController::class, 'publicIndex'])->name('public.guides.index');
 
-
 Route::prefix('about-us')->group(function () {
     Route::get('profil', function () {
         return Inertia::render('AboutUs/Profile');
