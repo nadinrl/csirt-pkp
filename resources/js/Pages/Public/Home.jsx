@@ -234,6 +234,44 @@ export default function Home() {
                 </section>
             </main>
 
+            {/* PETA SERANGAN SIBER */}
+            <div className="w-[1100px] bg-[#0018451b] rounded-xl mt-8 mb-12 mx-auto px-6 py-6">
+                <div className="container mx-auto px-4 text-center">
+                <h1 className="text-2xl font-bold mb-6 font-body text-[#0f172a]">
+                Peta Serangan
+            </h1>
+            <div className="w-full max-w-5xl mx-auto overflow-hidden shadow-lg mb-6">
+                <iframe
+                    id="iframe-kaspersky"
+                    src="https://cybermap.kaspersky.com/en/widget/dynamic/dark"
+                    width="846"
+                    height="597"
+                    style={{
+                      border: "none",
+                      width: "100%",
+                      maxWidth: "100%",
+                      height: "600px"
+                    }}
+                    title="Peta Serangan Kaspersky"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+
+                <p className="text-sm text-left pl-4 text-gray-700">
+                  <strong>Source:</strong>{" "}
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://cybermap.kaspersky.com/"
+                    className="text-blue-600 underline"
+                  >
+                    Kaspersky CyberMap
+                  </a>
+                </p>
+              </div>
+            </div>
+
+
             <PublicFooter />
         </>
     );
