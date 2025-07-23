@@ -40,13 +40,13 @@ export default function PublicFooter() {
                     <h3 className="font-bold text-lg mb-3">Dokumen Keamanan Khusus</h3>
                     <ul className="space-y-1 text-base">
                         <li>
-                            <a href="/storage/rfc2350.pdf" target="_blank" className="text-white hover:underline">
-                                📘 RFC 2350 - Informasi Tim CSIRT
+                            <a href="/storage/rfc2350.pdf" download="RFC2350_Informasi_Tim_CSIRT.pdf" className="text-white hover:underline">
+                                RFC 2350 - Informasi Tim CSIRT
                             </a>
                         </li>
                         <li>
-                            <a href="/storage/public-key.asc" target="_blank" className="text-white hover:underline">
-                                🔐 Unduh Public Key PGP
+                            <a href="/storage/public-key.asc" download="public-key-pgp.asc" className="text-white hover:underline">
+                                Unduh Public Key PGP
                             </a>
                         </li>
                     </ul>

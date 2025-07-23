@@ -14,7 +14,8 @@ use App\Http\Controllers\{
     GuideController,
     IncidentController,
     IncidentResponseController,
-    PublicController
+    PublicController,
+    AboutController
 };
 
 // 🌐 Halaman Publik
@@ -23,9 +24,27 @@ Route::get('/artikel', [ArticleController::class, 'publicIndex'])->name('public.
 Route::get('/artikel/{slug}', [ArticleController::class, 'show'])->name('articles.show');
 
 Route::get('/panduan', [GuideController::class, 'publicIndex'])->name('public.guides');
-Route::get('/panduan/{guide}/detail', [GuideController::class, 'detail'])->name('public.guides.detail');
-Route::get('/panduan/{guide}', [GuideController::class, 'show'])->name('public.guides.show');
+Route::get('/panduan/{guide}', [GuideController::class, 'show'])->name('public.guides.show'); // untuk download
+Route::get('/panduan/{guide}/detail', [GuideController::class, 'detail'])->name('public.guides.detail'); // untuk preview
+Route::get('/panduan-publik', [GuideController::class, 'publicIndex'])->name('public.guides.index');
 
+Route::prefix('about-us')->group(function () {
+    Route::get('profil', function () {
+        return Inertia::render('AboutUs/Profile');
+    })->name('about-us.profil');
+
+    Route::get('visi-misi', function () {
+        return Inertia::render('AboutUs/VisiMisi');
+    })->name('about-us.visi-misi');
+
+    Route::get('struktur-organisasi', function () {
+        return Inertia::render('AboutUs/StrukturOrganisasi');
+    })->name('about-us.struktur-organisasi');
+
+    Route::get('faq', function () {
+        return Inertia::render('AboutUs/Faq');
+    })->name('about-us.faq');
+});
 
 Route::prefix('lapor-insiden')->group(function () {
     Route::get('/', [IncidentController::class, 'create'])->name('incidents.create');
