@@ -120,17 +120,6 @@ export default function Home() {
 						))}
 					</div>
 				</section>
-
-                {/* DOKUMEN KHUSUS */}
-                <section className="space-y-4">
-                    <h2 className="text-2xl font-bold text-[#0f172a]">Dokumen Keamanan Khusus</h2>
-                    <a href="/storage/rfc2350.pdf" target="_blank" className="text-blue-700 hover:underline block">
-                        📘 RFC 2350 - Informasi Tim CSIRT
-                    </a>
-                    <a href="/storage/public-key.asc" target="_blank" className="text-blue-700 hover:underline block">
-                        🔐 Unduh Public Key PGP
-                    </a>
-                </section>
             </main>
 
             <PublicFooter />
