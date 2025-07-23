@@ -8,7 +8,7 @@ export default function ArticleShow() {
 
     const imageUrl = article.image
         ? `/storage/${article.image}`
-        : "/storage/articles/default.jpg";
+        : "/default.jpg";
 
     return (
         <>
@@ -22,12 +22,20 @@ export default function ArticleShow() {
                         <h1 className="text-3xl font-bold text-slate-800 mb-4">{article.title}</h1>
                         <p className="text-sm text-slate-500 mb-6">
                             Ditulis oleh {article.author?.name || "Administrator"}
+                            
+                            <p className="text-sm text-slate-500">
+                            {new Date(article.created_at).toLocaleDateString("id-ID", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })}
+                        </p>
                         </p>
 
                         <img
                             src={imageUrl}
                             alt={article.title}
-                            className="w-full h-auto max-h-[400px] object-cover rounded-lg mb-8"
+                            className="w-full h-auto max-h-[400px] object-cover mb-8"
                         />
 
                         <article
@@ -51,7 +59,7 @@ export default function ArticleShow() {
                         {suggestions.map((s) => {
                             const suggestionImage = s.image
                                 ? `/storage/${s.image}`
-                                : "/storage/articles/default.jpg";
+                                : "/default.jpg";
 
                             return (
                                 <div
@@ -65,9 +73,10 @@ export default function ArticleShow() {
                                             className="w-full h-32 object-cover"
                                         />
                                         <div className="p-3">
-                                            <h3 className="text-sm font-medium text-slate-800 group-hover:text-red-600 line-clamp-2">
+                                            <h3 className="text-xl font-bold text-slate-800 group-hover:text-red-600 line-clamp-2">
                                                 {s.title}
                                             </h3>
+                                            <p className="text-sm text-slate-600 line-clamp-3">{s.excerpt}</p>
                                         </div>
                                     </Link>
 
