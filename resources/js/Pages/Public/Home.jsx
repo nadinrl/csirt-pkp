@@ -174,7 +174,7 @@ export default function Home() {
                             >
                                 <div className="h-48 bg-gray-100 rounded-t-xl overflow-hidden">
                                     <img
-                                        src={article.image ? `/storage/${article.image}` : '/storage/articles/default.jpg'}
+                                        src={article.image ? `/storage/${article.image}` : '/default.jpg'}
                                         alt={article.title}
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                     />
