@@ -167,7 +167,16 @@ class ArticleController extends Controller implements HasMiddleware
     $suggestions = Article::where('slug', '!=', $slug)
         ->latest()
         ->take(2)
-        ->get(['id', 'title', 'slug', 'content', 'image']);
+        ->get(['id', 'title', 'slug', 'content', 'image'])
+        ->map(function ($article) {
+            return [
+                'id' => $article->id,
+                'title' => $article->title,
+                'slug' => $article->slug,
+                'image' => $article->image,
+                'excerpt' => \Illuminate\Support\Str::limit(strip_tags($article->content), 80),
+            ];
+        });
 
     return inertia('Public/Articles/Show', [
         'article' => $article,

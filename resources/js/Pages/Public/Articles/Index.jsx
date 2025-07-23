@@ -20,17 +20,25 @@ export default function ArticleIndex() {
         <Link
             key={article.id}
             href={route("articles.show", article.slug)}
-            className="border p-4 rounded-md shadow hover:shadow-md transition bg-white flex flex-col gap-3"
+            className="group bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300 border hover:border-red-400 flex flex-col gap-3 p-4"
         >
-        <img
-                src={article.image ? `/storage/${article.image}` : '/storage/articles/default.jpg'}
+            <img
+                src={article.image ? `/storage/${article.image}` : '/default.jpg'}
                 alt={article.title}
-                className="w-full h-48 object-cover rounded-md"
-        />
+                className="w-full h-48 object-cover"
+            />
             <h3 className="text-lg font-semibold text-slate-800">{article.title}</h3>
+            <p className="text-sm text-slate-500">
+                {new Date(article.created_at).toLocaleDateString("id-ID", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                })}
+            </p>
             <p className="text-sm text-slate-600 line-clamp-3">{article.excerpt}</p>
             <span className="text-xs text-red-600 mt-auto">Baca Selengkapnya →</span>
-            </Link>
+        </Link>
+
         ))}
         </div>
 
