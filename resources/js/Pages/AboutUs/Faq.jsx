@@ -16,16 +16,24 @@ export default function Faq() {
 
     const faqs = [
         {
-            question: "1. What is the difference between CERT and CSIRT ?",
-            answer: "CSIRT stands for computer security incident response team. CERT stands for computer emergency response (or readiness) team. And CIRT can stand for either computer incident response team or, less frequently, cybersecurity incident response team. CSIRT, CERT and CIRT are often used interchangeably in the field. In fact, CSIRT and CIRT are almost always near-equivalent; essentially they are synonyms. An organization might prefer one or the other based on the organization’s language or style, or subtle differences in organizational scope. Generally though, the meaning is consistent with the formal definition and description of CSIRT’s outlined in the 2007 Carnegie Mellon document “Defining Computer Security Incident Response Teams.” Its first line reads: “A computer security incident response team (CSIRT) is a concrete organizational entity (i.e., one or more staff) that is assigned the responsibility for coordinating and supporting the response to a computer security event or incident.”"
+            question: "Apa itu CSIRT?",
+            answer: "CSIRT (Computer Security Incident Response Team) adalah tim yang bertanggung jawab untuk menerima, meninjau, dan merespons laporan insiden keamanan siber. Tujuan utamanya adalah untuk meminimalkan dampak insiden keamanan dan memulihkan sistem secepat mungkin."
         },
         {
-            question: "2. What is the difference between ID-SIRTI/CC and CSIRT.ID ?",
-            answer: "ID-SIRTII/CC is the national computer security incident response team, while CSIRT.ID is an identifier that distinguishes a CSIRT that focuses on handling incidents in a specific sector or organization. (This answer needs to be filled with actual relevant information)."
+            question: "Bagaimana cara melaporkan insiden keamanan?",
+            answer: "Anda dapat melaporkan insiden keamanan melalui menu 'Lapor Insiden' yang tersedia di navigasi utama kami. Ikuti langkah-langkah yang diminta untuk memberikan detail insiden."
         },
         {
-            question: "3. Contoh pertanyaan lain?",
-            answer: "Ini adalah jawaban untuk pertanyaan lain. Anda bisa mengisi dengan konten yang relevan."
+            question: "Apa yang harus saya lakukan jika sistem saya terinfeksi malware?",
+            answer: "Segera putuskan koneksi internet pada perangkat yang terinfeksi untuk mencegah penyebaran lebih lanjut. Jangan mencoba membersihkan sendiri jika Anda tidak yakin. Laporkan insiden tersebut kepada kami melalui formulir laporan insiden."
+        },
+        {
+            question: "Apakah laporan insiden saya akan dirahasiakan?",
+            answer: "Ya, semua laporan insiden ditangani dengan kerahasiaan penuh. Informasi yang Anda berikan hanya akan digunakan untuk tujuan penanganan dan analisis insiden."
+        },
+        {
+            question: "Berapa lama waktu yang dibutuhkan untuk merespons laporan insiden?",
+            answer: "Waktu respons kami bervariasi tergantung pada tingkat keparahan dan kompleksitas insiden. Namun, kami berkomitmen untuk merespons semua laporan secepat mungkin dan memberikan pembaruan secara berkala."
         }
     ];
 
@@ -35,34 +43,25 @@ export default function Faq() {
 
             <PublicHeader />
 
-            {/* Main content area, adjust max-w- and padding to match image */}
-            <main className="max-w-3xl mx-auto px-4 py-12"> {/* Adjusted max-w- to 3xl and px- to 4 */}
-                <h1 className="text-4xl font-bold mb-8 text-[#0f172a] text-center">F.A.Q</h1> {/* Adjusted text size to 4xl to match image */}
+            <main className="max-w-4xl mx-auto px-6 py-12">
+                <h1 className="text-3xl font-bold mb-8 text-[#0f172a] text-center">FAQ</h1>
 
-                {/* Container for all FAQ items */}
-                <div className="bg-white rounded-lg shadow-md p-6"> {/* Added p-6 for inner padding */}
+                <div className="max-w-4xl mx-auto px-6 space-y-4"> {/* Mengurangi space-y menjadi 4 */}
                     {faqs.map((item, index) => (
-                        <div
-                            key={index}
-                            className={`
-                                overflow-hidden
-                                ${index < faqs.length - 1 ? 'border-b border-gray-200 mb-0' : 'mb-0'} {/* Only add border-b for items not last, no mb- */}
-                                ${index > 0 ? 'mt-0' : ''} {/* No margin-top if it's the first item */}
-                            `}
-                        >
-                            {/* Question button */}
+                        <div key={index} className="bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden">
+                            {/* Bagian Pertanyaan yang bisa diklik */}
                             <button
-                                className="w-full text-left py-4 px-0 flex justify-between items-center text-lg font-semibold text-gray-800 cursor-pointer focus:outline-none" // Adjusted padding and text color
+                                className="w-full text-left p-5 flex justify-between items-center text-xl font-semibold text-[#0f172a] cursor-pointer hover:bg-gray-50 focus:outline-none"
                                 onClick={() => toggleFaq(index)}
-                                aria-expanded={openIndex === index}
-                                aria-controls={`faq-answer-${index}`}
+                                aria-expanded={openIndex === index} // Aksesibilitas
+                                aria-controls={`faq-answer-${index}`} // Aksesibilitas
                             >
                                 {item.question}
-                                {/* Icon */}
+                                {/* Icon Plus/Minus */}
                                 <svg
-                                    className={`w-5 h-5 transition-transform duration-300 ${ // Adjusted icon size
+                                    className={`w-6 h-6 transform transition-transform duration-300 ${
                                         openIndex === index ? 'rotate-180' : ''
-                                    } text-gray-600`} // Adjusted icon color
+                                    }`}
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -72,16 +71,16 @@ export default function Faq() {
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
                                         strokeWidth="2"
-                                        d={openIndex === index ? "M19 9l-7 7-7-7" : "M19 9l-7 7-7-7"} // Changed icon to chevron
+                                        d={openIndex === index ? "M18 12H6" : "M12 6v6m0 0v6m0-6h6m-6 0H6"}
                                     ></path>
                                 </svg>
                             </button>
 
-                            {/* Answer section */}
+                            {/* Bagian Jawaban yang tersembunyi/muncul */}
                             {openIndex === index && (
                                 <div
-                                    id={`faq-answer-${index}`}
-                                    className="pb-4 pt-2 text-gray-600 leading-relaxed animate-fade-in" // Adjusted padding and text color
+                                    id={`faq-answer-${index}`} // Aksesibilitas
+                                    className="px-5 pb-5 pt-0 text-gray-700 leading-relaxed animate-fade-in" // Menambahkan padding-top 0
                                 >
                                     {item.answer}
                                 </div>
