@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Incident;
+use App\Models\IncidentResponse; // Import IncidentResponse model
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -40,8 +41,12 @@ class IncidentController extends Controller implements HasMiddleware
     {
         $incident->load('responses.responder');
 
+        // Define all possible statuses in the desired order
+        $statuses = ['received', 'in_progress', 'completed', 'closed'];
+
         return inertia('Incidents/Show', [
             'incident' => $incident,
+            'statuses' => $statuses, // Pass statuses to the frontend for dropdown
         ]);
     }
 
@@ -51,16 +56,18 @@ class IncidentController extends Controller implements HasMiddleware
     public function create()
     {
         $a = rand(1, 10);
-		$b = rand(1, 10);
-		session(['captcha_result' => $a + $b]);
+        $b = rand(1, 10);
+        session(['captcha_result' => $a + $b]);
 
-		return inertia('Public/Incidents/Create', [
-			'captcha' => ['a' => $a, 'b' => $b],
-		]);
+        return inertia('Public/Incidents/Create', [
+            'captcha' => ['a' => $a, 'b' => $b],
+        ]);
     }
 
     /**
      * 🌐 Public: Submit new incident with captcha validation.
+     *
+     * This method now automatically creates the initial "Aduan diterima" response.
      */
     public function store(Request $request)
     {
@@ -76,8 +83,8 @@ class IncidentController extends Controller implements HasMiddleware
 
         // Validate captcha from session
         if ((int) $request->captcha_answer !== session('captcha_result')) {
-			return back()->withErrors(['captcha_answer' => 'Jawaban captcha salah.'])->withInput();
-		}
+            return back()->withErrors(['captcha_answer' => 'Jawaban captcha salah.'])->withInput();
+        }
 
         // Hapus captcha dari session agar tidak bisa reuse
         session()->forget(['captcha_a', 'captcha_b', 'captcha_result']);
@@ -88,6 +95,7 @@ class IncidentController extends Controller implements HasMiddleware
             $attachmentPath = $request->file('attachment')->store('incident_attachments', 'public');
         }
 
+        // Create the incident with 'received' status as the initial state
         $incident = Incident::create([
             'ticket_number' => strtoupper(Str::random(10)),
             'reporter_name' => $request->reporter_name,
@@ -96,7 +104,15 @@ class IncidentController extends Controller implements HasMiddleware
             'title' => $request->title,
             'description' => $request->description,
             'attachment' => $attachmentPath,
-            'status' => 'open',
+            'status' => 'received', // Set initial status to 'received'
+        ]);
+
+        // Automatically create the initial incident response
+        IncidentResponse::create([
+            'incident_id' => $incident->id,
+            'responder_id' => null, // Set to null for system-generated response
+            'response' => 'Aduan diterima dan akan diproses oleh petugas.',
+            'status_at_response' => 'received', // Record the status at the time of this response
         ]);
 
         return to_route('incidents.track', ['ticket' => $incident->ticket_number])
@@ -124,9 +140,10 @@ class IncidentController extends Controller implements HasMiddleware
                 'responses' => $incident->responses->map(fn ($r) => [
                     'id' => $r->id,
                     'response' => $r->response,
-                    'responder_name' => $r->responder->name ?? 'Admin',
+                    'responder_name' => $r->responder->name ?? 'Sistem', // Change 'Admin' to 'Sistem' for null responder_id
                     'created_at' => $r->created_at,
-                ]),
+                    'status_at_response' => $r->status_at_response, // Include status_at_response
+                ])->sortBy('created_at')->values(), // Ensure responses are sorted by creation time
             ]
         ]);
     }
