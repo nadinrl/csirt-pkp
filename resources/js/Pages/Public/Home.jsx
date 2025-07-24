@@ -6,33 +6,8 @@ import { motion } from "framer-motion";
 import PublicHeader from "@/Components/PublicHeader";
 import PublicFooter from "@/Components/PublicFooter";
 
-
 export default function Home() {
     const { sliders, articles, guides } = usePage().props;
-
-     const heroSlides = [
-        {
-            id: 1,
-            image: '/images/1.jpg', 
-            title: 'Cyber Security Incident Response Team', 
-            subtitle: 'Kementerian Perumahan dan Kawasan Permukiman Republik Indonesia', 
-            subSubtitle: 'PKP-CSIRT'
-        },
-        {
-            id: 2,
-            image: '/images/2.jpg',
-            title: 'Amankan Siber Anda, Lindungi Bangsa Kita',
-            subtitle: 'Wujudkan Ekosistem Digital yang Tangguh',
-            subSubtitle: 'Bersama PKP-CSIRT'
-        },
-        {
-            id: 3,
-            image: '/images/3.png',
-            title: 'Siaga Penuh, Hadapi Ancaman Siber',
-            subtitle: 'CSIRT Kementerian PKP Selalu di Depan',
-            subSubtitle: 'Tangguh dan Terpercaya'
-        },
-    ];
 
     const heroSliderSettings = {
         dots: true,
@@ -48,28 +23,12 @@ export default function Home() {
         cssEase: 'linear',
     };
 
-    const generalSliderSettings = {
-        dots: true,
-        infinite: true,
-        speed: 600,
-        autoplay: true,
-        autoplaySpeed: 5000,
-        slidesToShow: 1,
-        slidesToScroll: 1,
-        arrows: true,
-        pauseOnHover: true,
-    };
-
-    
     const textVariants = {
         hidden: { opacity: 0, y: 50 },
         visible: {
             opacity: 1,
             y: 0,
-            transition: {
-                duration: 0.8,
-                ease: "easeOut"
-            }
+            transition: { duration: 0.8, ease: "easeOut" }
         },
     };
 
@@ -78,8 +37,8 @@ export default function Home() {
         visible: {
             opacity: 1,
             transition: {
-                staggerChildren: 0.2, 
-                delayChildren: 0.1 
+                staggerChildren: 0.2,
+                delayChildren: 0.1
             }
         }
     };
@@ -87,76 +46,48 @@ export default function Home() {
     return (
         <>
             <Head title="Beranda - CSIRT Kementerian PKP" />
-            {}
             <PublicHeader />
 
-            {/* HERO SECTION */}
-           
-            <section className="relative w-screen min-h-screen overflow-hidden">
-                <Slider {...heroSliderSettings} className="h-full">
-                    {heroSlides.map((slide) => (
-                        
-                        <div key={slide.id} className="relative w-full h-screen">
-                            <img
-                                src={slide.image}
-                                alt={slide.title}
-                                className="w-full h-full object-cover absolute inset-0"
-                            />
-                            {/* Overlay untuk teks */}
-                            <motion.div
-                                className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center text-white p-6 text-center"
-                                variants={containerVariants}
-                                initial="hidden"
-                                animate="visible"
-                            >
-                                <motion.h1
-                                    className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 px-4 max-w-4xl" 
-                                    variants={textVariants}
+            {/* HERO SECTION - Slider dinamis */}
+            <div className="overflow-x-hidden">
+                <section className="relative w-full min-h-screen overflow-hidden">
+                    <Slider {...heroSliderSettings} className="h-full">
+                        {sliders?.map((slide) => (
+                            <div key={slide.id} className="relative w-full h-screen">
+                                <img
+                                    src={`/storage/${slide.image}`}
+                                    alt={slide.title || 'Slider'}
+                                    className="w-full h-full max-w-full object-cover absolute inset-0"
+                                />
+                                <motion.div
+                                    className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center text-white p-6 text-center"
+                                    variants={containerVariants}
+                                    initial="hidden"
+                                    animate="visible"
                                 >
-                                    {slide.title}
-                                </motion.h1>
-                                <motion.p
-                                    className="text-lg md:text-xl lg:text-2xl mb-6 px-4 max-w-3xl" 
-                                    variants={textVariants}
-                                >
-                                    {slide.subtitle}
-                                </motion.p>
-                                {/* */}
-                                {slide.subSubtitle && (
-                                    <motion.p
-                                        className="text-md md:text-lg lg:text-xl font-semibold px-4" 
-                                        variants={textVariants}
-                                    >
-                                        {slide.subSubtitle}
-                                    </motion.p>
-                                )}
-                            </motion.div>
-                        </div>
-                    ))}
-                </Slider>
-            </section>
+                                    {slide.title && (
+                                        <motion.h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 px-4 max-w-4xl" variants={textVariants}>
+                                            {slide.title}
+                                        </motion.h1>
+                                    )}
+                                    {slide.caption && (
+                                        <motion.p className="text-lg md:text-xl lg:text-2xl mb-6 px-4 max-w-3xl" variants={textVariants}>
+                                            {slide.caption}
+                                        </motion.p>
+                                    )}
+                                    {slide.sub_subtitle && (
+                                        <motion.p className="text-md md:text-lg lg:text-xl font-semibold px-4" variants={textVariants}>
+                                            {slide.sub_subtitle}
+                                        </motion.p>
+                                    )}
+                                </motion.div>
+                            </div>
+                        ))}
+                    </Slider>
+                </section>
+            </div>
 
-            {/* Konten lain dari halaman yang ingin tetap dalam container */}
-            {/* Pindahkan class container ke div baru di sini */}
             <main className="container mx-auto px-4 lg:px-6 py-10 space-y-20">
-
-                {/* SLIDER (Slider yang sudah ada dari props). Uncomment jika ingin digunakan kembali */}
-                {/* {sliders?.length > 0 && (
-                    <section className="rounded-lg overflow-hidden shadow-xl">
-                        <Slider {...generalSliderSettings}>
-                            {sliders.map((slider) => (
-                                <div key={slider.id}>
-                                    <img
-                                        src={`/storage/${slider.image}`}
-                                        alt={slider.title}
-                                        className="w-full h-[400px] object-cover"
-                                    />
-                                </div>
-                            ))}
-                        </Slider>
-                    </section>
-                )} */}
-
                 {/* ARTIKEL */}
                 <section>
                     <div className="flex justify-between items-center mb-6">
@@ -224,42 +155,41 @@ export default function Home() {
             </main>
 
             {/* PETA SERANGAN SIBER */}
-            <div className="w-[1100px] bg-[#0018451b] rounded-xl mt-8 mb-12 mx-auto px-6 py-6">
-                <div className="container mx-auto px-4 text-center">
-                <h1 className="text-2xl font-bold mb-6 font-body text-[#0f172a]">
-                Peta Serangan
-            </h1>
-            <div className="w-full max-w-5xl mx-auto overflow-hidden shadow-lg mb-6">
-                <iframe
-                    id="iframe-kaspersky"
-                    src="https://cybermap.kaspersky.com/en/widget/dynamic/dark"
-                    width="846"
-                    height="597"
-                    style={{
-                      border: "none",
-                      width: "100%",
-                      maxWidth: "100%",
-                      height: "600px"
-                    }}
-                    title="Peta Serangan Kaspersky"
-                    allowFullScreen
-                  ></iframe>
+            <div className="max-w-7xl mx-auto bg-[#0018451b] rounded-xl mt-8 mb-12 px-6 py-6">
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold mb-6 font-body text-[#0f172a]">
+                        Peta Serangan
+                    </h1>
+                    <div className="w-full max-w-5xl mx-auto overflow-hidden shadow-lg mb-6">
+                        <iframe
+                            id="iframe-kaspersky"
+                            src="https://cybermap.kaspersky.com/en/widget/dynamic/dark"
+                            width="846"
+                            height="597"
+                            style={{
+                                border: "none",
+                                width: "100%",
+                                maxWidth: "100%",
+                                height: "600px"
+                            }}
+                            title="Peta Serangan Kaspersky"
+                            allowFullScreen
+                        ></iframe>
+                    </div>
+
+                    <p className="text-sm text-left pl-4 text-gray-700">
+                        <strong>Source:</strong>{" "}
+                        <a
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            href="https://cybermap.kaspersky.com/"
+                            className="text-blue-600 underline"
+                        >
+                            Kaspersky CyberMap
+                        </a>
+                    </p>
                 </div>
-
-                <p className="text-sm text-left pl-4 text-gray-700">
-                  <strong>Source:</strong>{" "}
-                  <a
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href="https://cybermap.kaspersky.com/"
-                    className="text-blue-600 underline"
-                  >
-                    Kaspersky CyberMap
-                  </a>
-                </p>
-              </div>
             </div>
-
 
             <PublicFooter />
         </>
