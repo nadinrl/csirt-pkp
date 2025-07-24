@@ -25,7 +25,7 @@ export default function ArticleIndex() {
             <img
                 src={article.image ? `/storage/${article.image}` : '/default.jpg'}
                 alt={article.title}
-                className="w-full h-48 object-cover"
+                className="w-full h-48 object-cover rounded-xl group-hover:scale-105 transition-transform duration-300"
             />
             <h3 className="text-lg font-semibold text-slate-800">{article.title}</h3>
             <p className="text-sm text-slate-500">
