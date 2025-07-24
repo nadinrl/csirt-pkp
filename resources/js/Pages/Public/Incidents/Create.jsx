@@ -3,6 +3,7 @@ import { Head, useForm } from "@inertiajs/react";
 import axios from "axios";
 import PublicHeader from "@/Components/PublicHeader";
 import PublicFooter from "@/Components/PublicFooter";
+import { IconRefresh, IconShieldCheck } from '@tabler/icons-react'; // Import IconRefresh and IconShieldCheck
 
 export default function IncidentCreate({ captcha }) {
     const [anonymous, setAnonymous] = useState(false);
@@ -35,7 +36,10 @@ export default function IncidentCreate({ captcha }) {
             <PublicHeader />
 
             <main className="max-w-3xl mx-auto px-4 py-12">
-                <h1 className="text-3xl font-bold text-slate-800 mb-6">🛡️ Lapor Insiden Siber</h1>
+                {/* Changed emoji to IconShieldCheck for a more professional look */}
+                <h1 className="text-3xl font-bold text-slate-800 mb-6 flex items-center">
+                    <IconShieldCheck size={32} stroke={1.5} className="mr-3 text-blue-600" /> Lapor Insiden Siber
+                </h1>
                 <p className="text-slate-600 mb-8">
                     Form ini digunakan untuk melaporkan insiden keamanan siber. Anda dapat memilih untuk melaporkan secara anonim.
                 </p>
@@ -124,11 +128,11 @@ export default function IncidentCreate({ captcha }) {
                             type="file"
                             onChange={(e) => setData("attachment", e.target.files[0])}
                            className="block w-full text-sm file:mr-4 file:py-2 file:px-4
-                                    file:rounded file:border-0
-                                    file:text-sm file:font-semibold
-                                    file:bg-blue-600 file:text-white
-                                    hover:file:bg-blue-700
-                                    transition-all duration-200"
+                                 file:rounded file:border-0
+                                 file:text-sm file:font-semibold
+                                 file:bg-blue-600 file:text-white
+                                 hover:file:bg-blue-700
+                                 transition-all duration-200"
                         />
                         {errors.attachment && <p className="text-sm text-red-600">{errors.attachment}</p>}
                         <p className="text-xs text-slate-500 mt-1">Maks. 4MB. Format: PDF, JPG, PNG, DOC, DOCX.</p>
@@ -151,10 +155,10 @@ export default function IncidentCreate({ captcha }) {
                             <button
                                 type="button"
                                 onClick={refreshCaptcha}
-                                className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded-md"
+                                className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded-md flex items-center justify-center" // Added flex classes for icon centering
                                 title="Refresh Captcha"
                             >
-                                🔄
+                                <IconRefresh size={20} stroke={1.5} /> {/* Replaced emoji with IconRefresh */}
                             </button>
                         </div>
                         {errors.captcha_answer && <p className="text-sm text-red-600 mt-1">{errors.captcha_answer}</p>}
@@ -162,15 +166,15 @@ export default function IncidentCreate({ captcha }) {
 
                     {/* Tombol Submit */}
                     <div className="pt-4">
-						<button
-							type="submit"
-							disabled={processing}
-							className={`px-6 py-2 rounded-md font-semibold text-white transition-colors duration-200
-								${processing ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'}`}
-						>
-							{processing ? "Mengirim..." : "Kirim Laporan"}
-						</button>
-					</div>
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className={`px-6 py-2 rounded-md font-semibold text-white transition-colors duration-200
+                                ${processing ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'}`}
+                        >
+                            {processing ? "Mengirim..." : "Kirim Laporan"}
+                        </button>
+                    </div>
                 </form>
             </main>
 
