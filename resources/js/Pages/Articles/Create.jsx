@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import Container from "@/Components/Container";
 import { Head, useForm } from "@inertiajs/react";
@@ -11,16 +11,16 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 
 export default function Create({ auth }) {
     const editorRef = useRef();
+    const [imagePreview, setImagePreview] = useState(null); // Untuk preview gambar
     const { data, setData, post, errors, processing, reset } = useForm({
         title: "",
         content: "",
-        image: null, // Tambahkan field image
+        image: null,
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // Gunakan FormData untuk menyertakan file
         const formData = new FormData();
         formData.append("title", data.title);
         formData.append("content", data.content);
@@ -30,7 +30,7 @@ export default function Create({ auth }) {
 
         post(route("articles.store"), {
             data: formData,
-            forceFormData: true, // penting agar inertia tahu kita mengirim FormData
+            forceFormData: true,
             onSuccess: () => {
                 Swal.fire({
                     title: "Berhasil!",
@@ -40,8 +40,19 @@ export default function Create({ auth }) {
                     showConfirmButton: false,
                 });
                 reset();
+                setImagePreview(null); // reset preview
             },
         });
+    };
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        setData("image", file);
+        if (file) {
+            setImagePreview(URL.createObjectURL(file));
+        } else {
+            setImagePreview(null);
+        }
     };
 
     return (
@@ -72,11 +83,23 @@ export default function Create({ auth }) {
                             <input
                                 type="file"
                                 accept="image/*"
-                                onChange={(e) => setData("image", e.target.files[0])}
+                                onChange={handleImageChange}
                                 className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
                             />
                             {errors.image && (
                                 <p className="text-sm text-red-500 mt-2">{errors.image}</p>
+                            )}
+
+                            {/* Preview */}
+                            {imagePreview && (
+                                <div className="mt-4">
+                                    <p className="text-sm text-gray-600 mb-1">Preview Gambar:</p>
+                                    <img
+                                        src={imagePreview}
+                                        alt="Preview"
+                                        className="max-h-60 rounded border border-gray-300 shadow"
+                                    />
+                                </div>
                             )}
                         </div>
 

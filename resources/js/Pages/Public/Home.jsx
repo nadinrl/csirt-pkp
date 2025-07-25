@@ -12,7 +12,7 @@ export default function Home() {
     const heroSliderSettings = {
         dots: true,
         infinite: true,
-        speed: 800,
+        speed: 1000,
         autoplay: true,
         autoplaySpeed: 3500,
         slidesToShow: 1,
