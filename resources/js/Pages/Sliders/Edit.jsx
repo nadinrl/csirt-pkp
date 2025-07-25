@@ -11,13 +11,13 @@ import Swal from "sweetalert2";
 export default function Edit({ auth, slider }) {
     const { data, setData, post, errors, processing } = useForm({
         title: slider.title || "",
-        caption: slider.caption || "", 
+        caption: slider.caption || "",
         image: null,
         is_active: slider.is_active ?? true,
         _method: "put",
     });
 
-    const [previewImage, setPreviewImage] = useState(slider.image_url);
+    const [previewImage, setPreviewImage] = useState(slider.image_url); // Awal = gambar lama
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -25,7 +25,7 @@ export default function Edit({ auth, slider }) {
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                setPreviewImage(reader.result);
+                setPreviewImage(reader.result); // Ganti preview dengan file baru
             };
             reader.readAsDataURL(file);
         }
@@ -70,7 +70,7 @@ export default function Edit({ auth, slider }) {
                         {/* Deskripsi */}
                         <TextArea
                             label="Deskripsi"
-                            value={data.caption} 
+                            value={data.caption}
                             onChange={(e) => setData("caption", e.target.value)}
                             errors={errors.caption}
                             placeholder="Deskripsi singkat slider ini..."
