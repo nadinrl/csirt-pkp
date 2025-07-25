@@ -29,9 +29,8 @@ export default function PublicFooter() {
                 <div className="flex flex-col items-center md:items-start text-center md:text-left">
                     <h3 className="font-bold text-lg mb-3">Navigasi</h3>
                     <ul className="space-y-1 text-base">
-                        <li><a href="#" className="hover:underline">Peta Situs</a></li>
-                        <li><a href="#" className="hover:underline">Hubungi Kami</a></li>
-                        <li><a href="#" className="hover:underline">FAQ</a></li>
+                        <li><a href="/kontak" className="hover:underline">Hubungi Kami</a></li>
+                        <li><a href="/about-us/faq" className="hover:underline">FAQ</a></li>
                     </ul>
                 </div>
 
