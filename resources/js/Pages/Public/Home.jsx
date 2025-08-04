@@ -88,43 +88,45 @@ export default function Home() {
             </div>
 
             <main className="container mx-auto px-4 lg:px-6 py-10 space-y-20">
-                {/* ARTIKEL */}
-                <section>
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold text-[#0f172a]">Artikel Keamanan Siber</h2>
-                        <Link href={route("public.articles")} className="text-sm text-[#dc2626] hover:underline">
-                            Lihat Semua →
-                        </Link>
+            {/* ARTIKEL */}
+            <section>
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-[#0f172a]">Artikel Keamanan Siber</h2>
+                    <Link href={route("public.articles")} className="text-sm text-[#dc2626] hover:underline">
+                    Lihat Semua →
+                    </Link>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {articles.slice(0, 3).map((article) => (
                             <Link
-                                key={article.id}
-                                href={route("articles.show", article.slug)}
-                                className="group bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300 border hover:border-red-400"
+                            key={article.id}
+                            href={route("articles.show", article.slug)}
+                            className="group relative block bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300"
                             >
-                                <div className="h-48 bg-gray-100 rounded-t-xl overflow-hidden">
+                                {/* Kontainer Utama untuk Gambar dan Teks */}
+                                <div className="relative w-full h-72">
                                     <img
-                                        src={article.image ? `/storage/${article.image}` : '/default.jpg'}
-                                        alt={article.title}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    src={article.image ? `/storage/${article.image}` : '/default.jpg'}
+                                    alt={article.title}
+                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                     />
-                                </div>
-                                <div className="p-5 flex flex-col justify-between h-40">
-                                    <h3 className="text-lg font-semibold text-[#0f172a] group-hover:text-red-600">
-                                        {article.title}
+                                {/* Overlay dan Judul */}
+                                <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col justify-end text-white bg-gradient-to-t from-black/80 to-transparent">
+                                    <h3 className="text-lg font-semibold transform transition-transform duration-300 group-hover:-translate-y-4">
+                                    {article.title}
                                     </h3>
-                                    <p className="text-sm text-slate-600 mt-2 line-clamp-3">
+                                    </div>
+                                {/*Deskripsi*/}
+                                <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col justify-end text-white opacity-0 transform translate-y-full transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
+                                    <p className="text-sm">
                                         {article.excerpt}
-                                    </p>
-                                    <span className="inline-block mt-3 text-xs text-[#dc2626] font-medium">
-                                        Baca Selengkapnya →
-                                    </span>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
-                </section>
+                                        </p>
+                                        </div>
+                                        </div>
+                                        </Link>
+                                    ))}
+                                    </div>
+            </section>
 
                 {/* PANDUAN */}
                 <section>
