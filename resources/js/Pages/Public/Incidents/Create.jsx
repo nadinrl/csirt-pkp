@@ -9,6 +9,10 @@ export default function IncidentCreate({ captcha }) {
     const [anonymous, setAnonymous] = useState(false);
     const [captchaChallenge, setCaptchaChallenge] = useState(captcha || { a: 0, b: 0 });
 
+    const [imagePreview, setImagePreview] = useState(null);
+    const [docPreviewUrl, setDocPreviewUrl] = useState(null);
+    const [fileWarning, setFileWarning] = useState("");
+
     const { data, setData, post, processing, errors } = useForm({
         reporter_name: "",
         reporter_email: "",
@@ -29,6 +33,45 @@ export default function IncidentCreate({ captcha }) {
         setCaptchaChallenge(response.data);
         setData("captcha_answer", "");
     };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+
+        // Reset semua preview dan state
+        setFileWarning("");
+        setImagePreview(null);
+        setDocPreviewUrl(null);
+        setData("attachment", null);
+
+        if (!file) return;
+
+        if (file.size > 4 * 1024 * 1024) {
+            setFileWarning("Ukuran file melebihi 4MB. Silakan unggah file yang lebih kecil.");
+            e.target.value = null; // ⛔️ Ini dia: reset input file
+            return;
+        }
+
+        // File valid — simpan ke state
+        setData("attachment", file);
+
+        const fileType = file.type;
+
+        if (fileType.startsWith("image/")) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        } else if (
+            fileType === "application/pdf" ||
+            file.name.toLowerCase().endsWith(".doc") ||
+            file.name.toLowerCase().endsWith(".docx")
+        ) {
+            const url = URL.createObjectURL(file);
+            setDocPreviewUrl(url);
+        }
+    };
+
 
     return (
         <>
@@ -58,7 +101,6 @@ export default function IncidentCreate({ captcha }) {
                             Lapor sebagai Anonim
                         </label>
                     </div>
-
                     {/* Identitas Pelapor */}
                     {!anonymous && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -96,7 +138,6 @@ export default function IncidentCreate({ captcha }) {
                             </div>
                         </div>
                     )}
-
                     {/* Judul Insiden */}
                     <div>
                         <label className="text-sm font-medium text-slate-700">Judul Insiden</label>
@@ -108,7 +149,6 @@ export default function IncidentCreate({ captcha }) {
                         />
                         {errors.title && <p className="text-sm text-red-600">{errors.title}</p>}
                     </div>
-
                     {/* Deskripsi Insiden */}
                     <div>
                         <label className="text-sm font-medium text-slate-700">Deskripsi Insiden</label>
@@ -120,24 +160,48 @@ export default function IncidentCreate({ captcha }) {
                         />
                         {errors.description && <p className="text-sm text-red-600">{errors.description}</p>}
                     </div>
-
                     {/* Lampiran */}
                     <div>
                         <label className="text-sm font-medium text-slate-700">Lampiran Bukti (opsional)</label>
                         <input
                             type="file"
-                            onChange={(e) => setData("attachment", e.target.files[0])}
-                           className="block w-full text-sm file:mr-4 file:py-2 file:px-4
-                                 file:rounded file:border-0
-                                 file:text-sm file:font-semibold
-                                 file:bg-blue-600 file:text-white
-                                 hover:file:bg-blue-700
-                                 transition-all duration-200"
+                            onChange={handleFileChange}
+                            className="block w-full text-sm file:mr-4 file:py-2 file:px-4
+                                file:rounded file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-blue-600 file:text-white
+                                hover:file:bg-blue-700
+                                transition-all duration-200"
                         />
                         {errors.attachment && <p className="text-sm text-red-600">{errors.attachment}</p>}
+                        {fileWarning && <p className="text-sm text-red-600 mt-1">{fileWarning}</p>}
                         <p className="text-xs text-slate-500 mt-1">Maks. 4MB. Format: PDF, JPG, PNG, DOC, DOCX.</p>
-                    </div>
 
+                        {/* Preview Gambar */}
+                        {imagePreview && (
+                            <div className="mt-4">
+                                <p className="text-sm text-slate-700 mb-2">Preview Gambar:</p>
+                                <img
+                                    src={imagePreview}
+                                    alt="Preview Lampiran"
+                                    className="max-h-64 rounded-md border border-slate-300"
+                                />
+                            </div>
+                        )}
+
+                        {/* Tombol Preview Dokumen */}
+                        {docPreviewUrl && (
+                            <div className="mt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => window.open(docPreviewUrl, "_blank")}
+                                    className="text-blue-600 underline text-sm hover:text-blue-800"
+                                >
+                                    Klik untuk preview dokumen
+                                </button>
+                            </div>
+                        )}
+                    </div>
                     {/* Captcha */}
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -163,7 +227,6 @@ export default function IncidentCreate({ captcha }) {
                         </div>
                         {errors.captcha_answer && <p className="text-sm text-red-600 mt-1">{errors.captcha_answer}</p>}
                     </div>
-
                     {/* Tombol Submit */}
                     <div className="pt-4">
                         <button

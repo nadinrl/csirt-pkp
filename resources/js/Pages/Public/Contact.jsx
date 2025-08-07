@@ -25,7 +25,7 @@ export default function Contact() {
                             📞 <strong>Telepon:</strong> 0812-3456-7890
                         </li>
                         <li>
-                            ✉️ <strong>Email:</strong> kontak@example.com
+                            ✉️ <strong>Email:</strong> pkpcsirt@gmail.com
                         </li>
                     </ul>
                 </div>
