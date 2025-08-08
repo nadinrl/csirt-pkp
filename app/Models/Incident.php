@@ -18,6 +18,7 @@ class Incident extends Model
         'ticket_number',
         'reporter_name',
         'reporter_email',
+        'reporter_phone',
         'title',
         'description',
         'status', // Pastikan 'status' ada di fillable
