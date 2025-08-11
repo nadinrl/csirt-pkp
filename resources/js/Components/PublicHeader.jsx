@@ -41,8 +41,8 @@ export default function PublicHeader() {
     return (
         <header className="bg-[#dc2626] text-white py-4 shadow-md sticky top-0 z-50">
             <div className="container mx-auto px-4 lg:px-6 flex flex-wrap items-center justify-between">
-                {/* Logo dan Judul */}
-                <div className="flex items-center gap-3">
+                {/* Logo dan Judul dengan link ke home */}
+                <Link href={route('home')} className="flex items-center gap-3">
                     <img
                         src="/logo-pkp.png"
                         alt="Logo PKP"
@@ -51,7 +51,7 @@ export default function PublicHeader() {
                     <span className="text-xl font-bold tracking-wide leading-tight">
                         CSIRT Kementerian PKP
                     </span>
-                </div>
+                </Link>
 
                 {/* Navigasi */}
                 <nav className="flex flex-wrap gap-1 sm:gap-2 md:gap-3 lg:gap-4 mt-4 sm:mt-0 text-sm font-medium">
