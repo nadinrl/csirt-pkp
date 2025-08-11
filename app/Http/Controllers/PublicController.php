@@ -33,7 +33,7 @@ class PublicController extends Controller
                     'image' => $article->image,
                 ];
             }),
-            'guides' => Guide::latest()->get()->map(function ($guide) {
+            'guides' => Guide::where('is_active', true)->latest()->get()->map(function ($guide) {
                 return [
                     'id' => $guide->id,
                     'title' => $guide->title,
