@@ -11,18 +11,41 @@ import hasAnyPermission from "@/Utils/Permissions";
 export default function Index({ auth }) {
     const { incidents, filters } = usePage().props;
 
+    // Fungsi helper untuk memformat status menjadi label yang mudah dibaca
+    const formatStatusLabel = (statusKey) => {
+        switch (statusKey) {
+            case 'received': return 'Diterima';
+            case 'in_progress': return 'Proses';
+            case 'completed': return 'Selesai';
+            case 'closed': return 'Ditutup';
+            default: return statusKey;
+        }
+    };
+
+    // Fungsi untuk merender badge status dengan warna
     const renderStatus = (status) => {
         const base = "inline-block px-2 py-1 text-xs rounded font-medium";
+        let colorClass = "";
+
         switch (status) {
-            case "open":
-                return <span className={`${base} bg-yellow-100 text-yellow-700`}>Open</span>;
+            case "received":
+                colorClass = "bg-blue-100 text-blue-700";
+                break;
             case "in_progress":
-                return <span className={`${base} bg-blue-100 text-blue-700`}>Diproses</span>;
-            case "resolved":
-                return <span className={`${base} bg-green-100 text-green-700`}>Selesai</span>;
+                colorClass = "bg-orange-100 text-orange-700";
+                break;
+            case "completed":
+                colorClass = "bg-green-100 text-green-700";
+                break;
+            case "closed":
+                colorClass = "bg-red-100 text-red-700";
+                break;
             default:
-                return <span className={`${base} bg-gray-100 text-gray-600`}>{status}</span>;
+                colorClass = "bg-gray-100 text-gray-600";
+                break;
         }
+
+        return <span className={`${base} ${colorClass}`}>{formatStatusLabel(status)}</span>;
     };
 
     return (
