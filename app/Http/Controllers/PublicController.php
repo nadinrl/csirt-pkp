@@ -21,7 +21,7 @@ class PublicController extends Controller
                     'image' => $slider->image,
                 ];
             }),
-            'articles' => Article::with('author')->latest()->take(3)->get()->map(function ($article) {
+            'articles' => Article::with('author')->where('is_active', true)->latest()->take(3)->get()->map(function ($article) {
                 return [
                     'id' => $article->id,
                     'title' => $article->title,
