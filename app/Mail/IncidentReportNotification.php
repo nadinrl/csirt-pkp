@@ -40,7 +40,7 @@ class IncidentReportNotification extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.incidents.notification',
+            view: 'emails.incidents.notification',
             with: ['report' => $this->report],
         );
     }

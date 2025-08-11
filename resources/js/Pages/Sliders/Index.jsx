@@ -1,15 +1,34 @@
-import React from "react";
+import React, { useState } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import Container from "@/Components/Container";
 import Table from "@/Components/Table";
 import Button from "@/Components/Button";
 import Pagination from "@/Components/Pagination";
 import Search from "@/Components/Search";
-import { Head, usePage } from "@inertiajs/react";
+import { Head, usePage, router } from "@inertiajs/react";
 import hasAnyPermission from "@/Utils/Permissions";
 
 export default function Index({ auth }) {
     const { sliders, filters } = usePage().props;
+    const [updatingStatus, setUpdatingStatus] = useState(null);
+
+    const toggleStatus = (id, currentStatus) => {
+        setUpdatingStatus(id);
+        router.put(
+            route("sliders.toggle-status", id),
+            { is_active: !currentStatus },
+            {
+                preserveScroll: true,
+                onFinish: () => setUpdatingStatus(null),
+            }
+        );
+    };
+
+    // Fungsi untuk memotong teks
+    const truncateText = (text, maxLength) => {
+        if (!text) return "";
+        return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+    };
 
     return (
         <AuthenticatedLayout
@@ -52,6 +71,7 @@ export default function Index({ auth }) {
                                 <Table.Th>Gambar</Table.Th>
                                 <Table.Th>Judul</Table.Th>
                                 <Table.Th>Deskripsi</Table.Th>
+                                <Table.Th>Status</Table.Th>
                                 <Table.Th className="text-center">Aksi</Table.Th>
                             </tr>
                         </Table.Thead>
@@ -68,9 +88,25 @@ export default function Index({ auth }) {
                                             className="w-32 h-20 object-cover rounded shadow"
                                         />
                                     </Table.Td>
-                                    <Table.Td>{slider.title}</Table.Td>
+                                    <Table.Td>
+                                        {truncateText(slider.title, 20)}
+                                    </Table.Td>
                                     <Table.Td className="max-w-sm text-slate-600 text-sm">
-                                        {slider.caption}
+                                        {truncateText(slider.caption, 50)}
+                                    </Table.Td>
+                                    <Table.Td>
+                                        <label className="inline-flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                className="sr-only peer"
+                                                checked={slider.is_active}
+                                                onChange={() =>
+                                                    toggleStatus(slider.id, slider.is_active)
+                                                }
+                                                disabled={updatingStatus === slider.id}
+                                            />
+                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500 relative"></div>
+                                        </label>
                                     </Table.Td>
                                     <Table.Td>
                                         <div className="flex justify-center gap-2">

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Head, Link, usePage, useForm } from "@inertiajs/react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import InputError from "@/Components/InputError";
@@ -6,25 +6,69 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import { IconArrowLeft } from '@tabler/icons-react';
 
 export default function Show({ auth }) {
-    // Pastikan 'incident' dan 'statuses' diterima dari props Inertia
     const { incident, statuses } = usePage().props;
 
     const { data, setData, post, processing, errors, reset } = useForm({
         response: "",
-        // Set status awal dropdown ke status insiden saat ini
-        // Pastikan incident.status adalah nilai yang valid dari array statuses
         status: incident.status,
     });
 
+    // Definisikan pesan default untuk setiap status
+    const defaultMessages = {
+        completed: "Laporan insiden telah berhasil diselesaikan. Detail penanganan dapat dilihat pada riwayat respons.",
+        closed: "Laporan insiden telah ditutup. Terima kasih atas laporan Anda."
+    };
+
+    // Efek samping untuk mengatur pesan default saat status berubah
+    useEffect(() => {
+        const currentStatus = data.status;
+        const currentResponse = data.response;
+
+        // Cek apakah status saat ini adalah 'completed' atau 'closed'
+        if (currentStatus === 'completed' || currentStatus === 'closed') {
+            const expectedDefaultMessage = defaultMessages[currentStatus];
+
+            // Jika response kosong, ATAU response saat ini adalah pesan default dari status LAIN,
+            // maka set pesan default yang sesuai dengan status saat ini.
+            if (currentResponse === "" ||
+                (currentStatus === 'completed' && currentResponse === defaultMessages.closed) ||
+                (currentStatus === 'closed' && currentResponse === defaultMessages.completed)
+            ) {
+                setData('response', expectedDefaultMessage);
+            }
+        } else {
+            // Jika status BUKAN 'completed' atau 'closed',
+            // dan response saat ini adalah salah satu dari pesan default, maka kosongkan response.
+            if (currentResponse === defaultMessages.completed || currentResponse === defaultMessages.closed) {
+                setData('response', '');
+            }
+        }
+    }, [data.status]); // Bergantung pada perubahan data.status
+
     const submit = (e) => {
         e.preventDefault();
-        // Kirim data ke method store di IncidentResponseController
+
+        // Kustomisasi validasi di frontend sebelum mengirim
+        // Jika status adalah 'completed' atau 'closed', response tidak wajib
+        const isResponseRequired = !(data.status === 'completed' || data.status === 'closed');
+
+        if (isResponseRequired && data.response.trim() === "") {
+            setData('errors', { ...errors, response: 'Isi Tanggapan wajib diisi untuk status ini.' });
+            return;
+        }
+
+        // Hapus error response jika sebelumnya ada dan sekarang sudah valid
+        if (!isResponseRequired && errors.response) {
+            setData('errors', { ...errors, response: null });
+        }
+
+
         post(route("incidents.responses.store", incident.id), {
             onSuccess: () => {
-                reset("response"); // Bersihkan textarea respons setelah berhasil
-                // Inertia secara otomatis akan me-reload props setelah POST berhasil,
-                // jadi incident.status dan responses akan diperbarui secara otomatis.
+                reset("response");
             },
+            preserveScroll: true, // Opsional: menjaga posisi scroll setelah submit
+            preserveState: true, // Opsional: menjaga state form setelah submit (kecuali yang direset)
         });
     };
 
@@ -160,11 +204,16 @@ export default function Show({ auth }) {
                                     name="response"
                                     value={data.response}
                                     onChange={(e) => setData("response", e.target.value)}
-                                    className="mt-1 block w-full border-2 border-gray-400 rounded-md shadow-md focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" // Dipertegas bingkai
+                                    className="mt-1 block w-full border-2 border-gray-400 rounded-md shadow-md focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                     rows="4"
                                     placeholder="Tulis tanggapan Anda di sini..."
+                                    // Atur required secara kondisional
+                                    required={!(data.status === 'completed' || data.status === 'closed')}
                                 ></textarea>
-                                <InputError message={errors.response} className="mt-2" />
+                                {/* Tampilkan error hanya jika ada dan response memang wajib */}
+                                {errors.response && !(data.status === 'completed' || data.status === 'closed') && (
+                                    <InputError message={errors.response} className="mt-2" />
+                                )}
                             </div>
 
                             <div>
@@ -174,9 +223,8 @@ export default function Show({ auth }) {
                                     name="status"
                                     value={data.status}
                                     onChange={(e) => setData("status", e.target.value)}
-                                    className="mt-1 block w-full border-2 border-gray-400 rounded-md shadow-md focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" // Dipertegas bingkai
+                                    className="mt-1 block w-full border-2 border-gray-400 rounded-md shadow-md focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                 >
-                                    {/* Pastikan statuses adalah array dan ada isinya */}
                                     {statuses && statuses.map((statusOption) => (
                                         <option key={statusOption} value={statusOption}>
                                             {formatStatusLabel(statusOption)}
@@ -187,7 +235,6 @@ export default function Show({ auth }) {
                             </div>
 
                             <div className="flex items-center gap-4">
-                                {/* Mengubah warna tombol Kirim menjadi merah */}
                                 <PrimaryButton disabled={processing} className="bg-red-600 hover:bg-red-700 active:bg-red-800 focus:ring-red-500">Kirim</PrimaryButton>
                                 <button
                                     type="button"

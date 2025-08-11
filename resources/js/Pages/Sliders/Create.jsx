@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import Container from "@/Components/Container";
 import Card from "@/Components/Card";
@@ -13,13 +13,24 @@ export default function Create({ auth }) {
         title: "",
         caption: "",
         image: null,
-        is_active: true, // default aktif
+        is_active: true,
     });
+
+    const [imagePreview, setImagePreview] = useState(null); // 👈 untuk preview
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
+        const formData = new FormData();
+        formData.append("title", data.title);
+        formData.append("caption", data.caption);
+        formData.append("is_active", data.is_active ? 1 : 0);
+        if (data.image) {
+            formData.append("image", data.image);
+        }
+
         post(route("sliders.store"), {
+            data: formData,
             forceFormData: true,
             onSuccess: () => {
                 Swal.fire({
@@ -30,8 +41,17 @@ export default function Create({ auth }) {
                     showConfirmButton: false,
                 });
                 reset();
+                setImagePreview(null); // reset preview
             },
         });
+    };
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        setData("image", file);
+        if (file) {
+            setImagePreview(URL.createObjectURL(file));
+        }
     };
 
     return (
@@ -69,7 +89,7 @@ export default function Create({ auth }) {
                             <input
                                 type="file"
                                 accept="image/*"
-                                onChange={(e) => setData("image", e.target.files[0])}
+                                onChange={handleImageChange}
                                 className="block w-full text-sm file:mr-4 file:py-2 file:px-4
                                     file:rounded file:border-0
                                     file:text-sm file:font-semibold
@@ -78,6 +98,18 @@ export default function Create({ auth }) {
                                     transition-all duration-200"
                             />
                             {errors.image && <p className="text-sm text-red-500 mt-2">{errors.image}</p>}
+
+                            {/* ✅ Preview */}
+                            {imagePreview && (
+                                <div className="mt-4">
+                                    <p className="text-sm text-gray-600 mb-1">Preview Gambar:</p>
+                                    <img
+                                        src={imagePreview}
+                                        alt="Preview"
+                                        className="max-h-60 rounded border border-gray-300 shadow"
+                                    />
+                                </div>
+                            )}
                         </div>
 
                         {/* Status Aktif */}

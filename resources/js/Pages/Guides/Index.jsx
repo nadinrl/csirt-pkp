@@ -5,11 +5,17 @@ import Table from "@/Components/Table";
 import Button from "@/Components/Button";
 import Pagination from "@/Components/Pagination";
 import Search from "@/Components/Search";
-import { Head, usePage } from "@inertiajs/react";
+import { Head, usePage, router } from "@inertiajs/react";
 import hasAnyPermission from "@/Utils/Permissions";
 
 export default function Index({ auth }) {
     const { guides, filters } = usePage().props;
+
+    const handleToggleStatus = (id) => {
+        router.patch(route("guides.toggle-status", id), {}, {
+            preserveScroll: true,
+        });
+    };
 
     return (
         <AuthenticatedLayout
@@ -61,9 +67,15 @@ export default function Index({ auth }) {
                                         <Table.Td>{guide.title}</Table.Td>
                                         <Table.Td>{guide.author?.name || "-"}</Table.Td>
                                         <Table.Td>
-                                            <span className={`px-2 py-1 rounded text-xs font-semibold ${guide.is_active ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"}`}>
-                                                {guide.is_active ? "Aktif" : "Nonaktif"}
-                                            </span>
+                                            <label className="inline-flex items-center cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    className="sr-only peer"
+                                                    checked={guide.is_active}
+                                                    onChange={() => handleToggleStatus(guide.id)}
+                                                />
+                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-500 relative"></div>
+                                            </label>
                                         </Table.Td>
                                         <Table.Td>
                                             <div className="flex justify-center gap-2">

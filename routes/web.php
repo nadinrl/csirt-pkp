@@ -93,6 +93,18 @@ Route::middleware('auth')->group(function () {
     Route::resource('sliders', SliderController::class)->except('show');
     Route::resource('guides', GuideController::class)->except('show');
 
+    // Toggle status artikel
+    Route::patch('/articles/{article}/toggle-status', [ArticleController::class, 'toggleStatus'])
+        ->name('articles.toggle-status');
+
+    // Toggle status slider
+    Route::put('/sliders/{slider}/toggle-status', [SliderController::class, 'toggleStatus'])
+        ->name('sliders.toggle-status');
+
+    // Toggle status panduan
+    Route::patch('/guides/{guide}/toggle-status', [GuideController::class, 'toggleStatus'])
+        ->name('guides.toggle-status');
+
     // ⚠️ Insiden
     Route::prefix('incidents')->name('incidents.')->group(function () {
         Route::get('/', [IncidentController::class, 'index'])->name('index');

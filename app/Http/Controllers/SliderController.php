@@ -15,7 +15,7 @@ class SliderController extends Controller implements HasMiddleware
         return [
             new Middleware('permission:sliders index', only: ['index']),
             new Middleware('permission:sliders create', only: ['create', 'store']),
-            new Middleware('permission:sliders edit', only: ['edit', 'update']),
+            new Middleware('permission:sliders edit', only: ['edit', 'update', 'toggleStatus']),
             new Middleware('permission:sliders delete', only: ['destroy']),
         ];
     }
@@ -62,14 +62,14 @@ class SliderController extends Controller implements HasMiddleware
     public function edit(Slider $slider)
     {
         return inertia('Sliders/Edit', [
-			'slider' => [
-				'id' => $slider->id,
-				'title' => $slider->title,
-				'caption' => $slider->caption, 
-				'image_url' => asset('storage/' . $slider->image),
-				'is_active' => $slider->is_active,
-			]
-		]);
+            'slider' => [
+                'id' => $slider->id,
+                'title' => $slider->title,
+                'caption' => $slider->caption, 
+                'image_url' => asset('storage/' . $slider->image),
+                'is_active' => $slider->is_active,
+            ]
+        ]);
     }
 
     public function update(Request $request, Slider $slider)
@@ -100,6 +100,22 @@ class SliderController extends Controller implements HasMiddleware
     {
         Storage::disk('public')->delete($slider->image);
         $slider->delete();
+
+        return back();
+    }
+
+    /**
+     * Toggle status aktif/nonaktif slider.
+     */
+    public function toggleStatus(Request $request, Slider $slider)
+    {
+        $request->validate([
+            'is_active' => 'required|boolean',
+        ]);
+
+        $slider->update([
+            'is_active' => $request->is_active,
+        ]);
 
         return back();
     }

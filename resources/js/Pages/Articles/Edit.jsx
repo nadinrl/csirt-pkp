@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import Container from "@/Components/Container";
 import { Head, useForm } from "@inertiajs/react";
@@ -11,6 +11,10 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 
 export default function Edit({ auth, article }) {
     const editorRef = useRef();
+    const [imagePreview, setImagePreview] = useState(
+        article.image ? `/storage/${article.image}` : null
+    );
+
     const { data, setData, post, errors, processing } = useForm({
         _method: 'PUT',
         title: article.title || "",
@@ -21,7 +25,16 @@ export default function Edit({ auth, article }) {
     const handleSubmit = (e) => {
         e.preventDefault();
 
+        const formData = new FormData();
+        formData.append('_method', 'PUT');
+        formData.append('title', data.title);
+        formData.append('content', data.content);
+        if (data.image) {
+            formData.append('image', data.image);
+        }
+
         post(route("articles.update", article.id), {
+            data: formData,
             forceFormData: true,
             onSuccess: () => {
                 Swal.fire({
@@ -33,6 +46,14 @@ export default function Edit({ auth, article }) {
                 });
             },
         });
+    };
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        setData("image", file);
+        if (file) {
+            setImagePreview(URL.createObjectURL(file));
+        }
     };
 
     return (
@@ -63,11 +84,23 @@ export default function Edit({ auth, article }) {
                             <input
                                 type="file"
                                 accept="image/*"
-                                onChange={(e) => setData("image", e.target.files[0])}
+                                onChange={handleImageChange}
                                 className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
                             />
                             {errors.image && (
                                 <p className="text-sm text-red-500 mt-2">{errors.image}</p>
+                            )}
+
+                            {/* ✅ Preview Gambar */}
+                            {imagePreview && (
+                                <div className="mt-4">
+                                    <p className="text-sm text-gray-600 mb-1">Preview Gambar:</p>
+                                    <img
+                                        src={imagePreview}
+                                        alt="Preview"
+                                        className="max-h-60 rounded border border-gray-300 shadow"
+                                    />
+                                </div>
                             )}
                         </div>
 
