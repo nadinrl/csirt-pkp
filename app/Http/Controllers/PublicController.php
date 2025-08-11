@@ -26,7 +26,7 @@ class PublicController extends Controller
                     'id' => $article->id,
                     'title' => $article->title,
                     'slug' => $article->slug,
-                    'excerpt' => \Str::limit(strip_tags($article->content), 100),
+                    'excerpt' => \Str::limit(strip_tags($article->content), 60),
                     'author' => [
                         'name' => optional($article->author)->name,
                     ],

@@ -2,15 +2,36 @@ import React, { useState } from "react";
 import { Head, Link, usePage } from "@inertiajs/react";
 import PublicHeader from "@/Components/PublicHeader";
 import PublicFooter from "@/Components/PublicFooter";
+import { IconX, IconFileDownload } from '@tabler/icons-react'; // Import IconX and IconFileDownload
 
 export default function TrackResult() {
     const { incident } = usePage().props;
     const [copied, setCopied] = useState(false);
+    const [lightboxOpen, setLightboxOpen] = useState(false); // State untuk mengontrol lightbox
+    const [lightboxContent, setLightboxContent] = useState(null); // State untuk menyimpan konten (gambar atau PDF) di lightbox
 
-    // Define the status steps for tracking (used for the progress bar)
+    // Fungsi untuk membuka lightbox
+    const openLightbox = (contentSrc, contentType) => {
+        setLightboxContent({ src: contentSrc, type: contentType });
+        setLightboxOpen(true);
+    };
+
+    // Fungsi untuk menutup lightbox
+    const closeLightbox = () => {
+        setLightboxOpen(false);
+        setLightboxContent(null);
+    };
+
+    // Logika untuk menentukan jenis file dan URL-nya
+    const attachmentUrl = incident.attachment ? `/storage/${incident.attachment}` : null;
+    const fileExtension = attachmentUrl ? attachmentUrl.split(".").pop().toLowerCase() : null;
+    const isImage = ["jpg", "jpeg", "png"].includes(fileExtension);
+    const isPdf = fileExtension === "pdf";
+    const isDoc = ["doc", "docx"].includes(fileExtension);
+
     const STATUS_STEPS = [
         {
-            label: "Aduan Diterima", // Kembali ke Bahasa Indonesia
+            label: "Aduan Diterima",
             statusKey: "received",
             icon: (
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -19,7 +40,7 @@ export default function TrackResult() {
             ),
         },
         {
-            label: "Proses Aduan", // Kembali ke Bahasa Indonesia
+            label: "Proses Aduan",
             statusKey: "in_progress",
             icon: (
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -28,7 +49,7 @@ export default function TrackResult() {
             ),
         },
         {
-            label: "Selesai", // Kembali ke Bahasa Indonesia
+            label: "Selesai",
             statusKey: "completed",
             icon: (
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -37,7 +58,7 @@ export default function TrackResult() {
             ),
         },
         {
-            label: "Ditutup", // Kembali ke Bahasa Indonesia
+            label: "Ditutup",
             statusKey: "closed",
             icon: (
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -52,26 +73,20 @@ export default function TrackResult() {
     );
 
     const handleCopy = () => {
-        // Create a temporary textarea element to copy text
         const tempInput = document.createElement('textarea');
         tempInput.value = incident.ticket_number;
         document.body.appendChild(tempInput);
         tempInput.select();
         try {
-            // Execute copy command
             document.execCommand('copy');
             setCopied(true);
         } catch (err) {
             console.error('Failed to copy text: ', err);
-            // If copy fails, the 'copied' state will not be set, providing implicit feedback.
         }
-        // Remove the temporary element
         document.body.removeChild(tempInput);
-        // Reset copied state after 2 seconds
         setTimeout(() => setCopied(false), 2000);
     };
 
-    // Helper function to format status for display in the response timeline
     const formatResponseStatusLabel = (statusKey) => {
         switch (statusKey) {
             case 'received': return 'Received';
@@ -140,7 +155,6 @@ export default function TrackResult() {
                     </div>
                 </section>
 
-
                 {/* Informasi Insiden */}
                 <section className="bg-white border border-slate-200 shadow-sm rounded-md p-6 space-y-4">
                     <h2 className="text-lg font-semibold text-slate-800 mb-2">📄 Rincian Laporan Insiden</h2>
@@ -159,15 +173,49 @@ export default function TrackResult() {
                         <div>
                             <p><strong>Tanggal Lapor:</strong> {new Date(incident.created_at).toLocaleString()}</p>
                             {incident.attachment && (
-                                <p className="mt-2">
-                                    <a
-                                        href={`/storage/${incident.attachment}`}
-                                        target="_blank"
-                                        className="text-blue-700 hover:underline"
-                                    >
-                                        📎 Unduh Lampiran Bukti
-                                    </a>
-                                </p>
+                                <div className="mt-2 space-y-2">
+                                    <p className="font-semibold text-slate-700">Lampiran Bukti:</p>
+                                    {/* Preview Gambar */}
+                                    {isImage && (
+                                        <div className="border border-slate-300 rounded-md p-2 max-w-sm">
+                                            <img
+                                                src={attachmentUrl}
+                                                alt="Preview Lampiran"
+                                                className="max-h-48 w-auto rounded-md cursor-pointer mx-auto"
+                                                onClick={() => openLightbox(attachmentUrl, 'image')}
+                                            />
+                                            <p className="text-center text-xs mt-2 text-slate-500">Klik untuk melihat lebih besar</p>
+                                        </div>
+                                    )}
+
+                                    {/* Preview Dokumen (PDF) */}
+                                    {isPdf && (
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => openLightbox(attachmentUrl, 'pdf')}
+                                                className="text-blue-700 hover:underline flex items-center gap-1"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-file-text" width="24" height="24" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 9l1 0" /><path d="M9 13l6 0" /><path d="M9 17l6 0" /></svg>
+                                                Lihat Dokumen
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* Tombol Unduh untuk semua tipe file */}
+                                    {attachmentUrl && (
+                                        <div className="mt-2">
+                                            <a
+                                                href={attachmentUrl}
+                                                download
+                                                className="text-slate-700 hover:text-slate-900 flex items-center gap-1"
+                                            >
+                                                <IconFileDownload size={20} />
+                                                Unduh Lampiran Bukti
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
                             )}
                         </div>
                     </div>
@@ -183,19 +231,18 @@ export default function TrackResult() {
                         <div className="relative border-l-2 border-red-600 pl-6">
                             {incident.responses.map((res) => (
                                 <div key={res.id} className="relative pb-8">
-                                    {/* Mengubah warna lingkaran berdasarkan status */}
                                     <span className={`absolute -left-3 top-1 w-5 h-5 rounded-full ring-4 ring-white
                                         ${res.status_at_response === 'received' ? 'bg-blue-500' : ''}
                                         ${res.status_at_response === 'in_progress' ? 'bg-orange-500' : ''}
                                         ${res.status_at_response === 'completed' ? 'bg-green-500' : ''}
                                         ${res.status_at_response === 'closed' ? 'bg-red-500' : ''}
-                                        ${!res.status_at_response ? 'bg-gray-500' : ''} {/* Fallback for no status */}
+                                        ${!res.status_at_response ? 'bg-gray-500' : ''}
                                     `}></span>
                                     <div className="bg-white border border-slate-200 p-4 rounded-md shadow-sm">
                                         <p className="text-slate-700 whitespace-pre-line">{res.response}</p>
                                         <div className="text-xs text-slate-500 mt-2">
                                             Direspons oleh <strong>{res.responder_name}</strong> pada {new Date(res.created_at).toLocaleString()}
-                                            {res.status_at_response && ( // Display status at response if available
+                                            {res.status_at_response && (
                                                 <span className={`ml-2 px-2 py-0.5 rounded-full text-white text-xs font-semibold
                                                     ${res.status_at_response === 'received' ? 'bg-blue-500' : ''}
                                                     ${res.status_at_response === 'in_progress' ? 'bg-orange-500' : ''}
@@ -225,6 +272,38 @@ export default function TrackResult() {
             </main>
 
             <PublicFooter />
+            
+            {/* Lightbox Modal */}
+            {lightboxOpen && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
+                    onClick={closeLightbox}
+                >
+                    <div className="relative p-4 bg-white rounded-lg shadow-xl max-w-3xl max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+                        <button
+                            onClick={closeLightbox}
+                            className="absolute top-2 right-2 text-gray-800 hover:text-gray-600 p-1 rounded-full bg-white bg-opacity-75 hover:bg-opacity-100 transition-all duration-200"
+                            title="Tutup"
+                        >
+                            <IconX size={24} stroke={2} />
+                        </button>
+                        {lightboxContent.type === 'image' && (
+                            <img
+                                src={lightboxContent.src}
+                                alt="Gambar Diperbesar"
+                                className="max-w-full max-h-full object-contain"
+                            />
+                        )}
+                        {lightboxContent.type === 'pdf' && (
+                            <iframe
+                                src={lightboxContent.src}
+                                className="w-[80vw] h-[80vh]"
+                                title="PDF Viewer"
+                            ></iframe>
+                        )}
+                    </div>
+                </div>
+            )}
         </>
     );
 }
