@@ -112,7 +112,7 @@ export default function Home() {
                                     />
                                 {/* Overlay dan Judul */}
                                 <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col justify-end text-white bg-gradient-to-t from-black/80 to-transparent">
-                                    <h3 className="text-lg font-semibold transform transition-transform duration-300 group-hover:-translate-y-4">
+                                    <h3 className="text-lg font-semibold transform transition-transform duration-300 group-hover:-translate-y-10">
                                     {article.title}
                                     </h3>
                                     </div>
