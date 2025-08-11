@@ -5,11 +5,25 @@ import Table from "@/Components/Table";
 import Button from "@/Components/Button";
 import Pagination from "@/Components/Pagination";
 import Search from "@/Components/Search";
-import { Head, usePage } from "@inertiajs/react";
+import { Head, usePage, router } from "@inertiajs/react";
 import hasAnyPermission from "@/Utils/Permissions";
 
 export default function Index({ auth }) {
     const { articles, filters } = usePage().props;
+
+    // Fungsi toggle status artikel
+    const handleToggleStatus = (id, currentStatus) => {
+        router.patch(
+            route("articles.toggle-status", id),
+            { is_active: currentStatus ? 0 : 1 },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    console.log("Status artikel berhasil diubah");
+                },
+            }
+        );
+    };
 
     return (
         <AuthenticatedLayout
@@ -49,6 +63,7 @@ export default function Index({ auth }) {
                                 <Table.Th>#</Table.Th>
                                 <Table.Th>Judul</Table.Th>
                                 <Table.Th>Penulis</Table.Th>
+                                <Table.Th>Status</Table.Th>
                                 <Table.Th className="text-center">Aksi</Table.Th>
                             </tr>
                         </Table.Thead>
@@ -60,6 +75,21 @@ export default function Index({ auth }) {
                                     </Table.Td>
                                     <Table.Td>{article.title}</Table.Td>
                                     <Table.Td>{article.author?.name}</Table.Td>
+                                    <Table.Td>
+                                        <label className="inline-flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                className="sr-only peer"
+                                                checked={article.is_active === 1}
+                                                onChange={() => handleToggleStatus(article.id, article.is_active)}
+                                            />
+                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer 
+                                                peer-checked:after:translate-x-full peer-checked:after:border-white 
+                                                after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white 
+                                                after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 
+                                                after:transition-all peer-checked:bg-green-500 relative"></div>
+                                        </label>
+                                    </Table.Td>
                                     <Table.Td>
                                         <div className="flex justify-center gap-2">
                                             {hasAnyPermission(["articles edit"]) && (

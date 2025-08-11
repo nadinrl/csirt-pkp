@@ -15,7 +15,7 @@ class ArticleController extends Controller implements HasMiddleware
         return [
             new Middleware('permission:articles index', only: ['index']),
             new Middleware('permission:articles create', only: ['create', 'store']),
-            new Middleware('permission:articles edit', only: ['edit', 'update']),
+            new Middleware('permission:articles edit', only: ['edit', 'update', 'toggleStatus']),
             new Middleware('permission:articles delete', only: ['destroy']),
         ];
     }
@@ -37,7 +37,6 @@ class ArticleController extends Controller implements HasMiddleware
             'filters' => $request->only('search'),
         ]);
     }
-
     /**
      * Admin: Form to create article.
      */
@@ -45,43 +44,35 @@ class ArticleController extends Controller implements HasMiddleware
     {
         return inertia('Articles/Create');
     }
-
     /**
      * Admin: Store new article.
      */
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'title' => 'required|min:5|max:255',
-        'content' => 'required',
-        'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-    ]);
+    {
+        $validated = $request->validate([
+            'title' => 'required|min:5|max:255',
+            'content' => 'required',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
 
-    $slug = $this->generateUniqueSlug($validated['title']);
+        $slug = $this->generateUniqueSlug($validated['title']);
+        $imagePath = null;
 
-    // Default image null
-    $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('articles', 'public');
+        }
 
-    // Simpan file gambar jika ada
-    if ($request->hasFile('image')) {
-        // Simpan ke storage/app/public/articles
-        $imagePath = $request->file('image')->store('articles', 'public');
-        // Hasilnya: "articles/namafile.jpg"
+        Article::create([
+            'title' => $validated['title'],
+            'slug' => $slug,
+            'content' => $validated['content'],
+            'author_id' => auth()->id(),
+            'image' => $imagePath,
+            'is_active' => 1, // default aktif saat dibuat
+        ]);
+
+        return to_route('articles.index')->with('success', 'Artikel berhasil ditambahkan.');
     }
-
-    // Buat artikel
-    Article::create([
-        'title' => $validated['title'],
-        'slug' => $slug,
-        'content' => $validated['content'],
-        'author_id' => auth()->id(),
-        'image' => $imagePath, // hanya simpan "articles/namafile.jpg"
-    ]);
-
-    return to_route('articles.index')->with('success', 'Artikel berhasil ditambahkan.');
-}
-
-
     /**
      * Admin: Edit form.
      */
@@ -91,7 +82,6 @@ class ArticleController extends Controller implements HasMiddleware
             'article' => $article,
         ]);
     }
-
     /**
      * Admin: Update article.
      */
@@ -107,9 +97,8 @@ class ArticleController extends Controller implements HasMiddleware
         if ($validated['title'] !== $article->title) {
             $slug = $this->generateUniqueSlug($validated['title'], $article->id);
         }
-
-        $imagePath = $article->image;
         
+        $imagePath = $article->image;
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('articles', 'public');
         }
@@ -123,7 +112,6 @@ class ArticleController extends Controller implements HasMiddleware
 
         return to_route('articles.index')->with('success', 'Artikel berhasil diperbarui.');
     }
-
     /**
      * Admin: Delete article.
      */
@@ -132,58 +120,56 @@ class ArticleController extends Controller implements HasMiddleware
         $article->delete();
         return back()->with('success', 'Artikel berhasil dihapus.');
     }
-
     /**
      * Public: List articles with pagination.
      */
     public function publicIndex()
-	{
-		$articles = Article::select('id', 'title', 'slug', 'content', 'created_at', 'image')
-			->latest()
-			->paginate(6)
-			->through(fn($article) => [
-				'id' => $article->id,
-				'title' => $article->title,
-				'slug' => $article->slug,
-				'excerpt' => Str::limit(strip_tags($article->content), 120),
-				'created_at' => $article->created_at,
-                'image' => $article->image,
-			]);
-
-		return inertia('Public/Articles/Index', [
-			'articles' => $articles,
-		]);
-	}
-
-
-    /**
-     * Public: Show article by slug.
-     */
-    public function show($slug)
     {
-    $article = Article::where('slug', $slug)->with('author')->firstOrFail();
-
-    // Ambil 2 artikel lain sebagai sugesti (selain yang sedang dibuka)
-    $suggestions = Article::where('slug', '!=', $slug)
-        ->latest()
-        ->take(2)
-        ->get(['id', 'title', 'slug', 'content', 'image'])
-        ->map(function ($article) {
-            return [
+        $articles = Article::select('id', 'title', 'slug', 'content', 'created_at', 'image')
+            ->where('is_active', 1) // hanya yang aktif
+            ->latest()
+            ->paginate(6)
+            ->through(fn($article) => [
                 'id' => $article->id,
                 'title' => $article->title,
                 'slug' => $article->slug,
+                'excerpt' => Str::limit(strip_tags($article->content), 120),
+                'created_at' => $article->created_at,
                 'image' => $article->image,
-                'excerpt' => \Illuminate\Support\Str::limit(strip_tags($article->content), 80),
-            ];
-        });
+            ]);
 
-    return inertia('Public/Articles/Show', [
-        'article' => $article,
-        'suggestions' => $suggestions,
-    ]);
-}
+        return inertia('Public/Articles/Index', [
+            'articles' => $articles,
+        ]);
+    }
 
+    public function show($slug)
+    {
+        $article = Article::where('slug', $slug)
+            ->where('is_active', 1) // hanya tampilkan yang aktif
+            ->with('author')
+            ->firstOrFail();
+
+        $suggestions = Article::where('slug', '!=', $slug)
+            ->where('is_active', 1)
+            ->latest()
+            ->take(2)
+            ->get(['id', 'title', 'slug', 'content', 'image'])
+            ->map(function ($article) {
+                return [
+                    'id' => $article->id,
+                    'title' => $article->title,
+                    'slug' => $article->slug,
+                    'image' => $article->image,
+                    'excerpt' => Str::limit(strip_tags($article->content), 80),
+                ];
+            });
+
+        return inertia('Public/Articles/Show', [
+            'article' => $article,
+            'suggestions' => $suggestions,
+        ]);
+    }
     /**
      * Generate unique slug.
      */
@@ -203,5 +189,17 @@ class ArticleController extends Controller implements HasMiddleware
         }
 
         return $slug;
+    }
+
+    /**
+     * Toggle status aktif/nonaktif artikel.
+     */
+    public function toggleStatus(Article $article, Request $request)
+    {
+        $article->update([
+            'is_active' => $request->is_active
+        ]);
+
+        return back()->with('success', 'Status artikel berhasil diubah.');
     }
 }
