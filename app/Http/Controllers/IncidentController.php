@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\Controllers\HasMiddleware;
+use Inertia\Inertia;
 
 class IncidentController extends Controller implements HasMiddleware
 {
@@ -21,6 +22,9 @@ class IncidentController extends Controller implements HasMiddleware
         ];
     }
 
+    /**
+     * Admin: Daftar insiden
+     */
     public function index(Request $request)
     {
         $incidents = Incident::with('responses.responder')
@@ -31,12 +35,15 @@ class IncidentController extends Controller implements HasMiddleware
             ->latest()
             ->paginate(10);
 
-        return inertia('Incidents/Index', [
+        return Inertia::render('Incidents/Index', [
             'incidents' => $incidents,
             'filters' => $request->only('search'),
         ]);
     }
 
+    /**
+     * Admin: Detail insiden
+     */
     public function show(Incident $incident)
     {
         $incident->load('responses.responder');
@@ -44,7 +51,7 @@ class IncidentController extends Controller implements HasMiddleware
         // Define all possible statuses in the desired order
         $statuses = ['received', 'in_progress', 'completed', 'closed'];
 
-        return inertia('Incidents/Show', [
+        return Inertia::render('Incidents/Show', [
             'incident' => $incident,
             'statuses' => $statuses, // Pass statuses to the frontend for dropdown
         ]);
@@ -59,7 +66,7 @@ class IncidentController extends Controller implements HasMiddleware
         $b = rand(1, 10);
         session(['captcha_result' => $a + $b]);
 
-        return inertia('Public/Incidents/Create', [
+        return Inertia::render('Public/Incidents/Create', [
             'captcha' => ['a' => $a, 'b' => $b],
         ]);
     }
@@ -71,18 +78,18 @@ class IncidentController extends Controller implements HasMiddleware
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'reporter_name' => 'nullable|string|max:255',
-            'reporter_email' => 'nullable|email|max:255',
-            'reporter_phone' => 'nullable|string|max:20',
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'attachment' => 'nullable|file|max:4096|mimes:pdf,jpg,jpeg,png,doc,docx',
-            'captcha_answer' => 'required|numeric',
+        $validated = $request->validate([
+            'reporter_name'   => 'nullable|string|max:255',
+            'reporter_email'  => 'nullable|email|max:255',
+            'reporter_phone'  => 'nullable|string|max:20',
+            'title'           => 'required|string|max:255',
+            'description'     => 'required|string',
+            'attachment'      => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:4096',
+            'captcha_answer'  => 'required|numeric',
         ]);
 
         // Validate captcha from session
-        if ((int) $request->captcha_answer !== session('captcha_result')) {
+        if ((int) $validated['captcha_answer'] !== session('captcha_result')) {
             return back()->withErrors(['captcha_answer' => 'Jawaban captcha salah.'])->withInput();
         }
 
@@ -97,57 +104,66 @@ class IncidentController extends Controller implements HasMiddleware
 
         // Create the incident with 'received' status as the initial state
         $incident = Incident::create([
-            'ticket_number' => strtoupper(Str::random(10)),
-            'reporter_name' => $request->reporter_name,
-            'reporter_email' => $request->reporter_email,
-            'reporter_phone' => $request->reporter_phone,
-            'title' => $request->title,
-            'description' => $request->description,
-            'attachment' => $attachmentPath,
-            'status' => 'received', // Set initial status to 'received'
+            'ticket_number'   => strtoupper(Str::random(10)),
+            'reporter_name'   => $validated['reporter_name'] ?? null,
+            'reporter_email'  => $validated['reporter_email'] ?? null,
+            'reporter_phone'  => $validated['reporter_phone'] ?? null,
+            'title'           => $validated['title'],
+            'description'     => $validated['description'],
+            'attachment'      => $attachmentPath,
+            'status'          => 'received',
         ]);
 
         // Automatically create the initial incident response
         IncidentResponse::create([
-            'incident_id' => $incident->id,
-            'responder_id' => null, // Set to null for system-generated response
-            'response' => 'Aduan diterima dan akan diproses oleh petugas.',
-            'status_at_response' => 'received', // Record the status at the time of this response
+            'incident_id'        => $incident->id,
+            'responder_id'       => null,
+            'response'           => 'Aduan diterima dan akan diproses oleh petugas.',
+            'status_at_response' => 'received',
         ]);
 
         return to_route('incidents.track', ['ticket' => $incident->ticket_number])
             ->with('success', 'Laporan berhasil dikirim. Simpan nomor tiket Anda.');
     }
 
+    /**
+     * Public: Lacak status insiden berdasarkan nomor tiket
+     */
     public function track($ticket)
     {
         $incident = Incident::where('ticket_number', $ticket)
             ->with('responses.responder')
             ->firstOrFail();
 
-        return inertia('Public/Incidents/TrackResult', [
+        return Inertia::render('Public/Incidents/TrackResult', [
             'incident' => [
-                'id' => $incident->id,
-                'title' => $incident->title,
-                'description' => $incident->description,
-                'ticket_number' => $incident->ticket_number,
-                'reporter_name' => $incident->reporter_name,
+                'id'             => $incident->id,
+                'title'          => $incident->title,
+                'description'    => $incident->description,
+                'ticket_number'  => $incident->ticket_number,
+                'reporter_name'  => $incident->reporter_name,
                 'reporter_email' => $incident->reporter_email,
                 'reporter_phone' => $incident->reporter_phone,
-                'status' => $incident->status,
-                'created_at' => $incident->created_at,
-                'attachment' => $incident->attachment,
-                'responses' => $incident->responses->map(fn ($r) => [
-                    'id' => $r->id,
-                    'response' => $r->response,
-                    'responder_name' => $r->responder->name ?? 'Sistem', // Change 'Admin' to 'Sistem' for null responder_id
-                    'created_at' => $r->created_at,
-                    'status_at_response' => $r->status_at_response, // Include status_at_response
-                ])->sortBy('created_at')->values(), // Ensure responses are sorted by creation time
+                'status'         => $incident->status,
+                'created_at'     => $incident->created_at,
+                'attachment'     => $incident->attachment,
+                'responses'      => $incident->responses
+                    ->map(fn($r) => [
+                        'id'                 => $r->id,
+                        'response'           => $r->response,
+                        'responder_name'     => $r->responder->name ?? 'Sistem',
+                        'created_at'         => $r->created_at,
+                        'status_at_response' => $r->status_at_response,
+                    ])
+                    ->sortBy('created_at')
+                    ->values(),
             ]
         ]);
     }
 
+    /**
+     * Admin: Hapus insiden
+     */
     public function destroy(Incident $incident)
     {
         if ($incident->attachment && Storage::disk('public')->exists($incident->attachment)) {

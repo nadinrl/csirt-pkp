@@ -47,6 +47,17 @@ export default function IncidentCreate({ captcha }) {
 
         if (!file) return;
 
+        // Daftar ekstensi/tipe file yang diizinkan
+        const allowedExtensions = ["pdf", "jpg", "jpeg", "png", "doc", "docx"];
+        const fileExtension = file.name.split(".").pop().toLowerCase();
+
+        if (!allowedExtensions.includes(fileExtension)) {
+            setFileWarning("Format file tidak diizinkan. Hanya PDF, JPG, JPEG, PNG, DOC, dan DOCX yang diperbolehkan.");
+            e.target.value = null; // Reset input file
+            return;
+        }
+
+        // Batas ukuran file
         if (file.size > 4 * 1024 * 1024) {
             setFileWarning("Ukuran file melebihi 4MB. Silakan unggah file yang lebih kecil.");
             e.target.value = null; // Reset input file
@@ -58,21 +69,25 @@ export default function IncidentCreate({ captcha }) {
 
         const fileType = file.type;
 
+        // Preview untuk gambar
         if (fileType.startsWith("image/")) {
             const reader = new FileReader();
             reader.onloadend = () => {
                 setImagePreview(reader.result);
             };
             reader.readAsDataURL(file);
-        } else if (
+        }
+        // Preview untuk PDF/DOC/DOCX
+        else if (
             fileType === "application/pdf" ||
-            file.name.toLowerCase().endsWith(".doc") ||
-            file.name.toLowerCase().endsWith(".docx")
+            fileExtension === "doc" ||
+            fileExtension === "docx"
         ) {
             const url = URL.createObjectURL(file);
             setDocPreviewUrl(url);
         }
     };
+
 
     // Fungsi untuk membuka lightbox
     const openLightbox = (imageSrc) => {

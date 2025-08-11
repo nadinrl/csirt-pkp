@@ -132,6 +132,7 @@ class GuideController extends Controller implements HasMiddleware
 
     /**
      * Public: Daftar panduan aktif
+     * (Digunakan oleh /panduan dan /panduan-publik)
      */
     public function publicIndex(Request $request)
     {
@@ -147,6 +148,17 @@ class GuideController extends Controller implements HasMiddleware
             'guides' => $guides,
             'filters' => $request->only('search'), // opsional, kalau mau kirim ke frontend
         ]);
+    }
+
+    /**
+     * Admin: Toggle status aktif/non-aktif panduan
+     */
+    public function toggleStatus(Guide $guide)
+    {
+        $guide->is_active = !$guide->is_active;
+        $guide->save();
+
+        return back()->with('success', 'Status panduan berhasil diperbarui.');
     }
 
     /**
@@ -166,20 +178,22 @@ class GuideController extends Controller implements HasMiddleware
         return response()->download($path, $filename);
     }
 
+    /**
+     * Public: Detail / preview panduan
+     */
     public function detail(Guide $guide, Request $request)
-	{
-		abort_unless($guide->is_active, 403);
+    {
+            abort_unless($guide->is_active, 403);
 
-		return inertia('Public/Guides/Show', [
-			'guide' => [
-				'id' => $guide->id,
-				'title' => $guide->title,
-				'description' => $guide->description,
-				'download_url' => route('public.guides.show', $guide),
-                'file_url' => asset('storage/' . $guide->file_path), // penting
-            ],
-             'page' => $request->query('page'),
-		]);
-	}
-
+            return inertia('Public/Guides/Show', [
+                'guide' => [
+                    'id' => $guide->id,
+                    'title' => $guide->title,
+                    'description' => $guide->description,
+                    'download_url' => route('public.guides.show', $guide),
+                    'file_url' => asset('storage/' . $guide->file_path),
+                ],
+                'page' => $request->query('page'),
+            ]);
+    }
 }
