@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\IncidentReportNotification;
 use App\Models\Incident;
-use App\Models\IncidentResponse; // Import IncidentResponse model
+use App\Models\IncidentResponse;
+use App\Mail\IncidentCompletedNotification;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Routing\Controllers\Middleware;
-use Illuminate\Routing\Controllers\HasMiddleware;
 use Inertia\Inertia;
 
 class IncidentController extends Controller implements HasMiddleware
@@ -47,7 +50,6 @@ class IncidentController extends Controller implements HasMiddleware
     public function show(Incident $incident)
     {
         $incident->load('responses.responder');
-
         // Define all possible statuses in the desired order
         $statuses = ['received', 'in_progress', 'completed', 'closed'];
 
@@ -121,6 +123,15 @@ class IncidentController extends Controller implements HasMiddleware
             'response'           => 'Aduan diterima dan akan diproses oleh petugas.',
             'status_at_response' => 'received',
         ]);
+
+        // --- Perubahan dimulai dari sini ---
+
+        // Kirim notifikasi email HANYA jika reporter_email ada
+        if ($incident->reporter_email) {
+            Mail::to($incident->reporter_email)->send(new IncidentReportNotification($incident));
+        }
+
+        // --- Perubahan berakhir di sini ---
 
         return to_route('incidents.track', ['ticket' => $incident->ticket_number])
             ->with('success', 'Laporan berhasil dikirim. Simpan nomor tiket Anda.');
